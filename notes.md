@@ -1,0 +1,1 @@
+For bamboo, the date posting is part of the endpoint: https://springfinancial.bamboohr.com/careers/208. Click on the `network tab` and search for `208` in this specific posting.
