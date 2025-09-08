@@ -121,18 +121,22 @@ def extract_age_in_days(obj) -> None:
     return None 
 
 def include_job(obj) -> bool:
-    job_id = obj.get("bulletFields", "")
+    job_id = obj.get("bulletFields", [])
 
+    if not job_id or len(job_id) == 0:
+        return True
+    
     if (job_id[0] in APPLIED_JOBS):
         return False
     return True
 
 def is_relevant_job(obj) -> bool:
-    job_title = obj.get("title", "")
-    words_in_job_title = set(re.split(r'\W+', job_title.upper()))
-
-    if TERMS_TO_EXCLUDE.intersection(words_in_job_title):
-        return False 
+    job_title = obj.get("title", "").upper()
+    
+    # Check for exact phrase matches first (like "MACHINE LEARNING")
+    for excluded_term in TERMS_TO_EXCLUDE:
+        if excluded_term in job_title:
+            return False
     
     return True 
 

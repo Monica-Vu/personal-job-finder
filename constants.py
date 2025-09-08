@@ -11,7 +11,7 @@ TERMS_TO_EXCLUDE = set([
     "SENIOR", 
     "MANAGER", 
     "MOBILE", 
-    "MACHINE LEARNING", 
+    "MACHINE LEARNING",  # Keep as exact phrase
     "MLOPS", 
     "DEVOPS"
 ])
