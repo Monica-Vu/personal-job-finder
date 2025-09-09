@@ -22,11 +22,18 @@ def fetch_workday_jobs(company_key: str) -> Optional[List[Dict[str, Any]]]:
     
     print(f"Searching for '{config.search_text}' jobs for {config.name}")
 
+    # Build appliedFacets dynamically based on configuration
+    applied_facets = {
+        config.location_facet_key: config.location_ids,
+        config.job_family_facet_key: config.job_family_group
+    }
+    
+    # Add locationCountry facet if configured (for companies like Remitly)
+    if config.location_country_ids:
+        applied_facets[config.location_country_facet_key] = config.location_country_ids
+
     payload = {
-        "appliedFacets": {
-            config.location_facet_key: config.location_ids,
-            config.job_family_facet_key: config.job_family_group
-        },
+        "appliedFacets": applied_facets,
         "limit": config.job_display_limit,
         "offset": 0,
         "searchText": config.search_text
@@ -89,7 +96,6 @@ def find_fresh_relevant_jobs(job_postings: List[Dict[str, Any]], company_name: s
     print(f"Found {len(relevant_jobs)} relevant jobs for {company_name}")
     return relevant_jobs
 
-
 def extract_age_in_days(obj) -> None:
     # This regex looks for:
     # Posted          - The literal word "Posted"
@@ -99,21 +105,20 @@ def extract_age_in_days(obj) -> None:
     # Days?           - The word "Day", with an optional "s" at the end
     # \s+             - One or more whitespace characters
     # Ago             - The literal word "Ago"
-    # print("text =>", obj)
     text = obj.get("postedOn", "")
 
     if not text: 
         return "No date for error" 
 
-    if text == "Today":
+    if text == "Posted Today":
         return 0
 
-    if text == "Yesterday":
+    if text == "Posted Yesterday":
         return 1   
 
-    pattern = r"Posted\s+(\d+)\+?\s+Days?\s+Ago"
+    pattern = r"Posted\s+(\d+)\+?\s+Days?\s+ago"
 
-    match = re.search(pattern, text)
+    match = re.search(pattern, text, re.IGNORECASE)
 
     if match:
         return match.group(1)

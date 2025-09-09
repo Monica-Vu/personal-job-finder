@@ -17,7 +17,7 @@ TERMS_TO_EXCLUDE = set([
 ])
 
 # Maximum age for jobs to be considered fresh (in days)
-MAX_AGE_FOR_JOB_IN_DAYS = 25
+MAX_AGE_FOR_JOB_IN_DAYS = 3
 
 # HTTP headers for API requests
 HEADERS = {

@@ -29,24 +29,26 @@ class TestExtractAgeInDays(unittest.TestCase):
     """Test the extract_age_in_days function"""
     
     def test_today(self):
-        """Test handling of 'Today' date"""
-        job = {"postedOn": "Today"}
+        """Test handling of 'Posted Today' date"""
+        job = {"postedOn": "Posted Today"}
         result = extract_age_in_days(job)
         self.assertEqual(result, 0)
     
     def test_yesterday(self):
-        """Test handling of 'Yesterday' date"""
-        job = {"postedOn": "Yesterday"}
+        """Test handling of 'Posted Yesterday' date"""
+        job = {"postedOn": "Posted Yesterday"}
         result = extract_age_in_days(job)
         self.assertEqual(result, 1)
     
     def test_posted_days_ago(self):
-        """Test parsing of 'Posted X Days Ago' format"""
+        """Test parsing of 'Posted X Days ago' format"""
         test_cases = [
-            ("Posted 5 Days Ago", "5"),
-            ("Posted 1 Day Ago", "1"),
-            ("Posted 10+ Days Ago", "10"),
-            ("Posted 30 Days Ago", "30")
+            ("Posted 5 Days ago", "5"),
+            ("Posted 5 days ago", "5"),  # lowercase 'days'
+            ("Posted 1 Day ago", "1"),
+            ("Posted 1 day ago", "1"),   # lowercase 'day'
+            ("Posted 10+ Days ago", "10"),
+            ("Posted 30 Days ago", "30")
         ]
         
         for input_text, expected in test_cases:
@@ -191,7 +193,7 @@ class TestFindFreshRelevantJobs(unittest.TestCase):
         """Test finding a fresh, relevant job"""
         job = {
             "title": "Software Developer",
-            "postedOn": "Posted 5 Days Ago",
+            "postedOn": "Posted 5 Days ago",
             "bulletFields": ["job123"]
         }
         result = find_fresh_relevant_jobs([job], "Test Company")
@@ -202,7 +204,7 @@ class TestFindFreshRelevantJobs(unittest.TestCase):
         """Test that old jobs are excluded"""
         job = {
             "title": "Software Developer",
-            "postedOn": "Posted 30 Days Ago",  # Older than MAX_AGE_FOR_JOB_IN_DAYS
+            "postedOn": "Posted 30 Days ago",  # Older than MAX_AGE_FOR_JOB_IN_DAYS
             "bulletFields": ["job123"]
         }
         result = find_fresh_relevant_jobs([job], "Test Company")
@@ -212,7 +214,7 @@ class TestFindFreshRelevantJobs(unittest.TestCase):
         """Test that irrelevant jobs are excluded"""
         job = {
             "title": "Senior Software Developer",  # Contains excluded term
-            "postedOn": "Posted 5 Days Ago",
+            "postedOn": "Posted 5 Days ago",
             "bulletFields": ["job123"]
         }
         result = find_fresh_relevant_jobs([job], "Test Company")
@@ -222,7 +224,7 @@ class TestFindFreshRelevantJobs(unittest.TestCase):
         """Test that already applied jobs are excluded"""
         job = {
             "title": "Software Developer",
-            "postedOn": "Posted 5 Days Ago",
+            "postedOn": "Posted 5 Days ago",
             "bulletFields": ["job123"]
         }
         APPLIED_JOBS["job123"] = True
@@ -244,22 +246,22 @@ class TestFindFreshRelevantJobs(unittest.TestCase):
         jobs = [
             {
                 "title": "Software Developer",
-                "postedOn": "Posted 5 Days Ago",
+                "postedOn": "Posted 5 Days ago",
                 "bulletFields": ["job1"]
             },
             {
                 "title": "Senior Developer",  # Excluded
-                "postedOn": "Posted 3 Days Ago",
+                "postedOn": "Posted 3 Days ago",
                 "bulletFields": ["job2"]
             },
             {
                 "title": "Junior Developer",
-                "postedOn": "Posted 30 Days Ago",  # Too old
+                "postedOn": "Posted 30 Days ago",  # Too old
                 "bulletFields": ["job3"]
             },
             {
                 "title": "Frontend Developer",
-                "postedOn": "Posted 2 Days Ago",
+                "postedOn": "Posted 2 Days ago",
                 "bulletFields": ["job4"]
             }
         ]
@@ -290,8 +292,8 @@ class TestFetchWorkdayJobs(unittest.TestCase):
         mock_response = Mock()
         mock_response.json.return_value = {
             "jobPostings": [
-                {"title": "Software Developer", "postedOn": "Posted 5 Days Ago"},
-                {"title": "Frontend Developer", "postedOn": "Posted 3 Days Ago"}
+                {"title": "Software Developer", "postedOn": "Posted 5 Days ago"},
+                {"title": "Frontend Developer", "postedOn": "Posted 3 Days ago"}
             ]
         }
         mock_response.raise_for_status.return_value = None
@@ -346,7 +348,7 @@ class TestSearchJobsForCompany(unittest.TestCase):
         mock_jobs = [
             {
                 "title": "Software Developer",
-                "postedOn": "Posted 5 Days Ago",
+                "postedOn": "Posted 5 Days ago",
                 "bulletFields": ["job1"]
             }
         ]

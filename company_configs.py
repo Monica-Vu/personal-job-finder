@@ -18,6 +18,9 @@ class CompanyConfig:
     # Optional: Custom facet keys for different Workday implementations
     location_facet_key: str = "locations"  # Default: "locations", CrowdStrike uses "locationCountry"
     job_family_facet_key: str = "jobFamilyGroup"  # Default: "jobFamilyGroup", CrowdStrike uses "Job_Family"
+    # For companies that need multiple location facet types (like Remitly)
+    location_country_ids: List[str] = None  # Optional: for locationCountry facet
+    location_country_facet_key: str = "locationCountry"  # Default: "locationCountry"
 
 
 # Company configurations - add new companies here
@@ -40,6 +43,17 @@ COMPANY_CONFIGS = {
         job_family_group=["1408861ee6e201641be2c2f6b000c00b"],  # Example job family ID
         location_facet_key="locationCountry",  # CrowdStrike uses "locationCountry"
         job_family_facet_key="Job_Family"  # CrowdStrike uses "Job_Family"
+    ),
+    "remitly": CompanyConfig(
+        name="Remitly",
+        api_url="https://remitly.wd5.myworkdayjobs.com/wday/cxs/remitly/Remitly_Careers/jobs",
+        search_text="",  # Empty search text to get all jobs
+        location_ids=["2458716c04a71002062e0e03eb960000"],  # New Westminster, British Columbia, Canada
+        job_family_group=["c9699b32e2da1029a051260e906d0000"],  # Software Engineering job family
+        location_facet_key="locations",  # Standard Workday facet key
+        job_family_facet_key="jobFamilyGroup",  # Standard Workday facet key
+        location_country_ids=["a30a87ed25634629aa6c3958aa2b91ea"],  # Canada (from locationCountry)
+        location_country_facet_key="locationCountry"  # Standard Workday facet key
     ),
     # Add more companies here as needed
     # Example:
