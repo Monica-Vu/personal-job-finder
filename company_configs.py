@@ -16,7 +16,7 @@ class CompanyConfig:
     job_family_group: List[str]
     job_display_limit: int = 20
     # Optional: Custom facet keys for different Workday implementations
-    location_facet_key: str = "locations"  # Default: "locations", CrowdStrike uses "locationCountry"
+    location_facet_key: str = "locations"  # Default: "locations", CrowdStrike uses "locationCountry", OpenLane uses "primaryLocation"
     job_family_facet_key: str = "jobFamilyGroup"  # Default: "jobFamilyGroup", CrowdStrike uses "Job_Family"
     # For companies that need multiple location facet types (like Remitly)
     location_country_ids: List[str] = None  # Optional: for locationCountry facet
@@ -54,6 +54,15 @@ COMPANY_CONFIGS = {
         job_family_facet_key="jobFamilyGroup",  # Standard Workday facet key
         location_country_ids=["a30a87ed25634629aa6c3958aa2b91ea"],  # Canada (from locationCountry)
         location_country_facet_key="locationCountry"  # Standard Workday facet key
+    ),
+    "openlane": CompanyConfig(
+        name="OpenLane",
+        api_url="https://kar.wd1.myworkdayjobs.com/wday/cxs/kar/OPENLANE_Careers/jobs",
+        search_text="",  # Empty search text to get all jobs
+        location_ids=["f1945455dade1001a7c8e263fef60000"],  # Primary location from curl
+        job_family_group=["1feabb51d74b0122d6b8a81cb700682d"],  # Job family group from curl
+        location_facet_key="primaryLocation",  # OpenLane uses "primaryLocation" instead of "locations"
+        job_family_facet_key="jobFamilyGroup"  # Standard Workday facet key
     ),
     # Add more companies here as needed
     # Example:

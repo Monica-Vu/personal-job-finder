@@ -280,6 +280,8 @@ class TestGetAvailableCompanies(unittest.TestCase):
         self.assertIsInstance(result, list)
         self.assertIn("clio", result)
         self.assertIn("crowdstrike", result)
+        self.assertIn("remitly", result)
+        self.assertIn("openlane", result)
 
 
 class TestFetchWorkdayJobs(unittest.TestCase):
@@ -379,16 +381,22 @@ class TestSearchJobsForAllCompanies(unittest.TestCase):
         """Test searching all companies"""
         mock_search.side_effect = [
             [{"title": "Clio Job"}],
-            [{"title": "CrowdStrike Job"}]
+            [{"title": "CrowdStrike Job"}],
+            [{"title": "Remitly Job"}],
+            [{"title": "OpenLane Job"}]
         ]
         
         result = search_jobs_for_all_companies()
         
         self.assertIn("clio", result)
         self.assertIn("crowdstrike", result)
+        self.assertIn("remitly", result)
+        self.assertIn("openlane", result)
         self.assertEqual(len(result["clio"]), 1)
         self.assertEqual(len(result["crowdstrike"]), 1)
-        self.assertEqual(mock_search.call_count, 2)
+        self.assertEqual(len(result["remitly"]), 1)
+        self.assertEqual(len(result["openlane"]), 1)
+        self.assertEqual(mock_search.call_count, 4)
 
 
 class TestPrintJobSummary(unittest.TestCase):
@@ -404,6 +412,12 @@ class TestPrintJobSummary(unittest.TestCase):
             ],
             "crowdstrike": [
                 {"title": "Security Engineer"}
+            ],
+            "remitly": [
+                {"title": "Backend Developer"}
+            ],
+            "openlane": [
+                {"title": "Full Stack Developer"}
             ]
         }
         

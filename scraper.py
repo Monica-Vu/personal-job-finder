@@ -1,7 +1,7 @@
 import re
 import requests
 from typing import Dict, List, Optional, Any
-from constants import APPLIED_JOBS, TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS, HEADERS
+from constants import APPLIED_JOBS, TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS, HEADERS, save_applied_jobs
 from company_configs import COMPANY_CONFIGS 
 
 def fetch_workday_jobs(company_key: str) -> Optional[List[Dict[str, Any]]]:
@@ -53,13 +53,14 @@ def fetch_workday_jobs(company_key: str) -> Optional[List[Dict[str, Any]]]:
         return None
 
 
-def find_fresh_relevant_jobs(job_postings: List[Dict[str, Any]], company_name: str = "") -> List[Dict[str, Any]]:
+def find_fresh_relevant_jobs(job_postings: List[Dict[str, Any]], company_name: str = "", company_key: str = "") -> List[Dict[str, Any]]:
     """
     Filter job postings to find fresh, relevant jobs
     
     Args:
         job_postings: List of job posting dictionaries
         company_name: Name of the company for logging purposes
+        company_key: Company key for tracking applied jobs per company
         
     Returns:
         List of relevant job postings
@@ -85,7 +86,7 @@ def find_fresh_relevant_jobs(job_postings: List[Dict[str, Any]], company_name: s
             job_posted_days = int(job_posted_days)
 
             if (MAX_AGE_FOR_JOB_IN_DAYS > job_posted_days and 
-                include_job(item) and 
+                include_job(item, company_key) and 
                 is_relevant_job(item)):
                 relevant_jobs.append(item)
                 
@@ -125,14 +126,26 @@ def extract_age_in_days(obj) -> None:
     
     return None 
 
-def include_job(obj) -> bool:
+def include_job(obj: Dict[str, Any], company_key: str) -> bool:
+    """
+    Check if a job should be included based on whether it's already been applied to
+    
+    Args:
+        obj: Job posting object
+        company_key: Company key from COMPANY_CONFIGS
+        
+    Returns:
+        True if job should be included, False if already applied to
+    """
     job_id = obj.get("bulletFields", [])
 
     if not job_id or len(job_id) == 0:
         return True
     
-    if (job_id[0] in APPLIED_JOBS):
+    # Check if this job ID has been applied to for this specific company
+    if company_key in APPLIED_JOBS and job_id[0] in APPLIED_JOBS[company_key]:
         return False
+    
     return True
 
 def is_relevant_job(obj) -> bool:
@@ -149,6 +162,63 @@ def get_available_companies() -> List[str]:
     """Return list of available company keys"""
     return list(COMPANY_CONFIGS.keys())
 
+def mark_job_as_applied(company_key: str, job_id: str) -> None:
+    """
+    Mark a job as applied to for a specific company
+    
+    Args:
+        company_key: Company key from COMPANY_CONFIGS
+        job_id: Job ID from the job posting
+    """
+    if company_key not in APPLIED_JOBS:
+        APPLIED_JOBS[company_key] = {}
+    
+    APPLIED_JOBS[company_key][job_id] = True
+    save_applied_jobs()  # Save to persistent storage
+    print(f"Marked job {job_id} as applied for {COMPANY_CONFIGS[company_key].name}")
+
+def get_applied_jobs_for_company(company_key: str) -> List[str]:
+    """
+    Get list of applied job IDs for a specific company
+    
+    Args:
+        company_key: Company key from COMPANY_CONFIGS
+        
+    Returns:
+        List of job IDs that have been applied to
+    """
+    if company_key not in APPLIED_JOBS:
+        return []
+    
+    return list(APPLIED_JOBS[company_key].keys())
+
+def get_all_applied_jobs() -> Dict[str, List[str]]:
+    """
+    Get all applied jobs organized by company
+    
+    Returns:
+        Dictionary mapping company keys to lists of applied job IDs
+    """
+    return {company_key: list(jobs.keys()) for company_key, jobs in APPLIED_JOBS.items()}
+
+def clear_applied_jobs_for_company(company_key: str) -> None:
+    """
+    Clear all applied jobs for a specific company
+    
+    Args:
+        company_key: Company key from COMPANY_CONFIGS
+    """
+    if company_key in APPLIED_JOBS:
+        del APPLIED_JOBS[company_key]
+        save_applied_jobs()  # Save to persistent storage
+        print(f"Cleared all applied jobs for {COMPANY_CONFIGS[company_key].name}")
+
+def clear_all_applied_jobs() -> None:
+    """Clear all applied jobs for all companies"""
+    APPLIED_JOBS.clear()
+    save_applied_jobs()  # Save to persistent storage
+    print("Cleared all applied jobs for all companies")
+
 def search_jobs_for_company(company_key: str) -> List[Dict[str, Any]]:
     """
     Search for jobs for a specific company
@@ -164,7 +234,7 @@ def search_jobs_for_company(company_key: str) -> List[Dict[str, Any]]:
         return []
     
     config = COMPANY_CONFIGS[company_key]
-    return find_fresh_relevant_jobs(job_postings, config.name)
+    return find_fresh_relevant_jobs(job_postings, config.name, company_key)
 
 def search_jobs_for_all_companies() -> Dict[str, List[Dict[str, Any]]]:
     """

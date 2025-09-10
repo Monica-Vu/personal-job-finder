@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/macos,python,visualstudiocode,windows,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,python,visualstudiocode,windows,linux
 
+# Applied jobs tracking file
+applied_jobs.json
+
 ### Linux ###
 *~
 

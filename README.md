@@ -7,6 +7,7 @@ A generalized Python scraper for job postings from companies that use Workday's 
 - **Multi-company support**: Easily add new companies that use Workday
 - **Configurable search parameters**: Customize search terms, locations, and job families per company
 - **Smart filtering**: Automatically filters out irrelevant jobs and tracks applied positions
+- **Company-aware job tracking**: Track applied jobs per company (same job ID can exist for different companies)
 - **Error handling**: Robust error handling for API failures and data parsing issues
 - **Flexible execution**: Search individual companies or all configured companies at once
 
@@ -97,6 +98,49 @@ print(results)
 companies = get_available_companies()
 print(companies)  # ['clio', 'new_company', ...]
 ```
+
+## Job Tracking
+
+The scraper includes company-aware job tracking to help you avoid applying to the same job multiple times. The key benefit is that **the same job ID can exist for different companies**, so you can apply to job "REQ-123" at both Clio and Remitly without conflicts.
+
+### Mark Jobs as Applied
+```python
+# Mark a job as applied for a specific company
+mark_job_as_applied("clio", "REQ-123")
+mark_job_as_applied("remitly", "REQ-456")
+
+# The same job ID can be applied to at different companies
+mark_job_as_applied("clio", "REQ-789")
+mark_job_as_applied("remitly", "REQ-789")  # This is allowed!
+```
+
+### Check Applied Jobs
+```python
+# Get applied jobs for a specific company
+clio_applied = get_applied_jobs_for_company("clio")
+print(clio_applied)  # ['REQ-123', 'REQ-789']
+
+# Get all applied jobs across all companies
+all_applied = get_all_applied_jobs()
+print(all_applied)  # {'clio': ['REQ-123', 'REQ-789'], 'remitly': ['REQ-456', 'REQ-789']}
+```
+
+### Clear Applied Jobs
+```python
+# Clear applied jobs for a specific company
+clear_applied_jobs_for_company("clio")
+
+# Clear all applied jobs for all companies
+clear_all_applied_jobs()
+```
+
+### How It Works
+- Each company maintains its own list of applied job IDs
+- The same job ID can exist for multiple companies
+- When searching jobs, the scraper only excludes jobs you've applied to for that specific company
+- This allows you to apply to the same job ID at different companies without conflicts
+- **Applied jobs are saved persistently** in `applied_jobs.json` and persist between script runs
+- The `applied_jobs.json` file is automatically created and managed by the scraper
 
 ## Configuration Options
 
