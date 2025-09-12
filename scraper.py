@@ -9,7 +9,7 @@ def fetch_workday_jobs(company_key: str) -> Optional[List[Dict[str, Any]]]:
     Fetch job postings from a company's Workday API
     
     Args:
-        company_key: Key from COMPANY_CONFIGS dictionary
+        compaany_key: Key from COMPANY_CONFIGS dictionary
         
     Returns:
         List of job postings or None if error

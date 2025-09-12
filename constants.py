@@ -1,72 +1,22 @@
-"""
-Constants and configuration values for the job scraper
-"""
-
-import json
-import os
+# constants.py
 from enum import StrEnum
+from typing import Set
 
-# HTTP headers for API requests
-HEADERS = {
-    "User-Agent": "Job-Finder/1.0",
-    "Content-Type": "application/json"
+# --- Enums ---
+class JobPostingAgeKey(StrEnum):
+    """Defines the API keys for a job's post date."""
+    POSTED_ON = "postedOn"
+    UPDATED_AT = "updated_at"
+
+# --- Filtering Configuration ---
+MAX_AGE_FOR_JOB_IN_DAYS: int = 25
+
+# Terms to exclude from job searches (in uppercase, as you prefer)
+TERMS_TO_EXCLUDE: Set[str] = {
+    "STAFF", "SENIOR", "SR.", "MANAGER", "MOBILE", 
+    "MACHINE LEARNING", "MLOPS", "DEVOPS", "SALESFORCE",
+    "DIRECTOR", "HELP DESK"
 }
 
-class JobPostingAgeKey(StrEnum):
-    POSTED_ON = "postedOn"
-
-class JobFreshness(StrEnum):
-    TODAY = "Posted Today"
-    YESTERDAY = "Posted Yesterday"
-
-# Maximum age for jobs to be considered fresh (in days)
-MAX_AGE_FOR_JOB_IN_DAYS: int = 3
-
-
-#### Not sure if used
-
-# File to store applied jobs persistently
-APPLIED_JOBS_FILE = "applied_jobs.json"
-
-# Global state for tracking applied jobs per company
-# Structure: {company_key: {job_id: True, ...}}
-APPLIED_JOBS = {}
-
-def load_applied_jobs():
-    """Load applied jobs from persistent storage"""
-    global APPLIED_JOBS
-    if os.path.exists(APPLIED_JOBS_FILE):
-        try:
-            with open(APPLIED_JOBS_FILE, 'r') as f:
-                APPLIED_JOBS = json.load(f)
-        except (json.JSONDecodeError, IOError) as e:
-            print(f"Warning: Could not load applied jobs from {APPLIED_JOBS_FILE}: {e}")
-            APPLIED_JOBS = {}
-    else:
-        APPLIED_JOBS = {}
-
-def save_applied_jobs():
-    """Save applied jobs to persistent storage"""
-    try:
-        with open(APPLIED_JOBS_FILE, 'w') as f:
-            json.dump(APPLIED_JOBS, f, indent=2)
-    except IOError as e:
-        print(f"Warning: Could not save applied jobs to {APPLIED_JOBS_FILE}: {e}")
-
-# Load applied jobs on module import
-load_applied_jobs()
-
-# Terms to exclude from job searches
-TERMS_TO_EXCLUDE = set([
-    "STAFF", 
-    "SENIOR", 
-    "SR.",  # Added Sr. abbreviation
-    "MANAGER", 
-    "MOBILE", 
-    "MACHINE LEARNING",  # Keep as exact phrase
-    "MLOPS", 
-    "DEVOPS",
-    "SALESFORCE",
-    "DIRECTOR",
-    "HELP DESK"
-])
+# --- File paths ---
+APPLIED_JOBS_FILE = "excluded_jobs.json"

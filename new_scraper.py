@@ -1,83 +1,180 @@
-from company_configs import COMPANY_CONFIGS
-from constants import HEADERS, JobPostingAgeKey, JobFreshness, TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS
+# main.py
 import requests
 import re
+import json
+import os
+from datetime import datetime, timezone, timedelta
+from typing import Any, Dict, List, Optional, Set
+from company_configs import COMPANY_CONFIGS, CompanyConfig
+# Import from our other project files
+from constants import TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS, APPLIED_JOBS_FILE
+from models import JobPosting
 
-def get_jobs_from_company(company: str) -> list or None:
-    obj = COMPANY_CONFIGS[company]
+#     "clio": CompanyConfig(
+#         api_url="https://clio.wd3.myworkdayjobs.com/wday/cxs/clio/ClioCareerSite/jobs",
+#         body={"searchText": "Software Developer", "limit": 20},
+#         parser_key="workday",
+#         job_id_key="bulletFields",
+#         job_age_key=JobPostingAgeKey.POSTED_ON
+#     ),
+#     "crowdstrike": CompanyConfig(
+#         api_url="https://crowdstrike.wd5.myworkdayjobs.com/wday/cxs/crowdstrike/crowdstrikecareers/jobs",
+#         body={"limit": 20, "searchText": "Software"},
+#         parser_key="workday",
+#         job_id_key="jobRequisitionId",
+#         job_age_key=JobPostingAgeKey.POSTED_ON
+#     ),
+#     "affinity": CompanyConfig(
+#         api_url="https://boards-api.greenhouse.io/v1/boards/affinity/jobs",
+#         http_method="GET",
+#         parser_key="greenhouse",
+#         job_id_key="id",
+#         job_age_key=JobPostingAgeKey.UPDATED_AT
+#     )
+# }
 
-    try: 
-        response = requests.post(obj.api_url, headers=HEADERS, json=obj.body, timeout=10)
-        response.raise_for_status()
+# --- Main Application Class ---
+class JobScraper:
+    def __init__(self, configs: dict):
+        self.configs = configs
+        self.session = requests.Session()
+        self.session.headers.update({"User-Agent": "MyJobScraper/1.0"})
+        self.applied_ids_by_company = self._load_applied_jobs()
+
+    def _load_applied_jobs(self) -> Dict[str, Set[str]]:
+        """Loads applied job IDs from the JSON file."""
+        if not os.path.exists(APPLIED_JOBS_FILE):
+            return {}
+        try:
+            with open(APPLIED_JOBS_FILE, 'r') as f:
+                raw_data = json.load(f)
+                return {company: set(job_ids) for company, job_ids in raw_data.items()}
+        except (json.JSONDecodeError, IOError) as e:
+            print(f"⚠️ Warning: Could not load applied jobs file: {e}")
+            return {}
+
+    def save_applied_jobs(self):
+        """Saves the current state of applied jobs to the JSON file."""
+        data_to_save = {company: list(job_ids) for company, job_ids in self.applied_ids_by_company.items()}
+        try:
+            with open(APPLIED_JOBS_FILE, 'w') as f:
+                json.dump(data_to_save, f, indent=2)
+            print(f"✅ Successfully saved applied jobs to {APPLIED_JOBS_FILE}")
+        except IOError as e:
+            print(f"❌ Error: Could not save applied jobs: {e}")
+
+    def run(self):
+        """Main method to run the entire scraping and filtering process."""
+        print("--- Starting Job Scraper ---")
+        all_jobs = self._fetch_and_parse_all_jobs()
         
-        data = response.json()
-        job_postings = data.get("jobPostings", [])
-        return job_postings
-    
-    except requests.exceptions.RequestException as e:
-        print(f"Error while fetching from {company}'s API: {e}")
+        print(f"\n--- Found {len(all_jobs)} total jobs. Filtering... ---")
+        fresh_jobs = self._filter_jobs(all_jobs)
+
+        if fresh_jobs:
+            print(f"\n✅ Found {len(fresh_jobs)} new, relevant jobs to review:")
+            for job in fresh_jobs:
+                print(f"  - {job.title} at {job.company.title()} ({job.location})")
+        else:
+            print("\n😔 No new relevant jobs found.")
+
+    def _fetch_and_parse_all_jobs(self) -> List[JobPosting]:
+        all_parsed_jobs = []
+        for name, config in self.configs.items():
+            print(f"Fetching jobs for {name.title()}...")
+            try:
+                if config.http_method.upper() == "POST":
+                    response = self.session.post(config.api_url, json=config.body, timeout=10)
+                else:
+                    response = self.session.get(config.api_url, timeout=10)
+                response.raise_for_status()
+                
+                parsed = self._parse_response(name, config, response.json())
+                all_parsed_jobs.extend(parsed)
+            except requests.exceptions.RequestException as e:
+                print(f"  ❌ Error fetching jobs for {name.title()}: {e}")
+        return all_parsed_jobs
+
+    def _parse_response(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
+        """Routes to the correct parser based on the config's parser_key."""
+        if config.parser_key == "workday":
+            return self._parse_workday_jobs(company, config, data)
+        elif config.parser_key == "greenhouse":
+            return self._parse_greenhouse_jobs(company, config, data)
+        print(f"  No parser found for key: {config.parser_key}")
+        return []
+
+    def _parse_date(self, date_value: Optional[str]) -> Optional[datetime]:
+        """Parses a date that can be an ISO timestamp or a relative string."""
+        if not isinstance(date_value, str): return None
+        try:
+            return datetime.fromisoformat(date_value.replace("Z", "+00:00"))
+        except ValueError:
+            date_str_lower = date_value.lower()
+            if "today" in date_str_lower: return datetime.now(timezone.utc)
+            if "yesterday" in date_str_lower: return datetime.now(timezone.utc) - timedelta(days=1)
+            match = re.search(r'(\d+)\+?\s+days?\s+ago', date_str_lower)
+            if match: return datetime.now(timezone.utc) - timedelta(days=int(match.group(1)))
         return None
 
-def find_fresh_relevant_jobs(job_postings: list, company: str):
-    obj = COMPANY_CONFIGS[company]
-    relevant_jobs = []
+    def _parse_workday_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
+        jobs = []
+        for raw_job in data.get("jobPostings", []):
+            job_id_list = raw_job.get(config.job_id_key, [])
+            if not job_id_list: continue
+            
+            jobs.append(JobPosting(
+                company=company,
+                job_id=job_id_list[0],
+                title=raw_job.get("title"),
+                url=f"https://{config.api_url.split('/')[2]}{raw_job.get('externalPath', '')}",
+                location=raw_job.get("locationsText"),
+                posted_date=self._parse_date(raw_job.get(config.job_age_key))
+            ))
+            print("jobs =>", jobs)
+        return jobs
 
-    job_posted_days = 0
+    def _parse_greenhouse_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
+        jobs = []
+        for raw_job in data.get("jobs", []):
+            job_id = str(raw_job.get(config.job_id_key, ""))
+            if not job_id: continue
 
-    for item in job_postings: 
-        if obj.job_age_key == JobPostingAgeKey.POSTED_ON:
-            job_posted_days = extract_days_of_job_posting(item)
+            jobs.append(JobPosting(
+                company=company,
+                job_id=job_id,
+                title=raw_job.get("title"),
+                url=raw_job.get("absolute_url"),
+                location=raw_job.get("location", {}).get("name"),
+                posted_date=self._parse_date(raw_job.get(config.job_age_key))
+            ))
+        return jobs
+
+    def _is_relevant_title(self, title: Optional[str]) -> bool:
+        """Efficiently checks if a title contains excluded terms using uppercase."""
+        if not title: return False
+        # Using .upper() as you prefer
+        words_in_title = set(re.split(r'\W+', title.upper()))
+        return not TERMS_TO_EXCLUDE.intersection(words_in_title)
+
+    def _filter_jobs(self, jobs: List[JobPosting]) -> List[JobPosting]:
+        """Filters a list of JobPosting objects through a pipeline of checks."""
+        final_jobs = []
+        today = datetime.now(timezone.utc)
         
-        if MAX_AGE_FOR_JOB_IN_DAYS > job_posted_days and include_job(item) and is_relevant_job(item):
-            relevant_jobs.append(item)
-    
-    return relevant_jobs
+        for job in jobs:
+            if job.job_id in self.applied_ids_by_company.get(job.company, set()):
+                continue
+            if not self._is_relevant_title(job.title):
+                continue
+            # This logic now KEEPS jobs with no date
+            if job.posted_date and (today - job.posted_date).days > MAX_AGE_FOR_JOB_IN_DAYS:
+                continue
+            
+            final_jobs.append(job)
+                
+        return final_jobs
 
-def extract_days_of_job_posting(job):
-    date_string = job.get("postedOn", "").casefold()
-
-    if not date_string:
-        return "A falsey value is returned in `extract_days_of_job_postings`"
-
-    if date_string == JobFreshness.TODAY.casefold():
-        return 0
-
-    if date_string == JobFreshness.YESTERDAY.casefold():
-        return 1 
-    
-    pattern = r"Posted\s+(\d+)\+?\s+Days?\s+ago"
-
-    match = re.search(pattern, date_string, re.IGNORECASE)
-
-    if match:
-        return int(match.group(1))
-    
-    return None 
-
-def include_job(obj: any):
-    job_id = obj.get("bulletFields", [])
-
-    return job_id
-
-def is_relevant_job(obj) -> bool:
-    job_title = obj.get("title", "").upper()
-    words_in_title = set(re.split(r'\W+', job_title.upper()))
-
-    return not TERMS_TO_EXCLUDE.intersection(words_in_title)
-
-def find_workday_jobs():
-    results = []
-
-    for company in COMPANY_CONFIGS:
-        all_jobs = get_jobs_from_company(company)
-        relevant_jobs = find_fresh_relevant_jobs(all_jobs, company)
-        results.extend(relevant_jobs)
-    
-    return results
-
-
-
-# results = get_jobs_from_company("clio")
-# print(find_fresh_relevant_jobs(results, "clio"))
-
-print(find_workday_jobs())
+if __name__ == "__main__":
+    scraper = JobScraper(COMPANY_CONFIGS)
+    scraper.run()

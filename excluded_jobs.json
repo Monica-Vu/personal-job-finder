@@ -1,6 +1,6 @@
 {
-  "crowdstrike": {
-    "R24702": true
+  "clio": {
+    "BF-REQ-3671": "Applied on September 11, 2025"
   },
   "remitly": {
     "R_103932": true,
