@@ -1,0 +1,14 @@
+{
+  "crowdstrike": {
+    "R24702": true
+  },
+  "remitly": {
+    "R_103932": true,
+    "R_104911": true
+  },
+  "weir": {
+    "R0032737": true,
+    "R0031920": true,
+    "R0033105": true
+  }
+}

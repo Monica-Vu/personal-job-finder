@@ -4,6 +4,26 @@ Constants and configuration values for the job scraper
 
 import json
 import os
+from enum import StrEnum
+
+# HTTP headers for API requests
+HEADERS = {
+    "User-Agent": "Job-Finder/1.0",
+    "Content-Type": "application/json"
+}
+
+class JobPostingAgeKey(StrEnum):
+    POSTED_ON = "postedOn"
+
+class JobFreshness(StrEnum):
+    TODAY = "Posted Today"
+    YESTERDAY = "Posted Yesterday"
+
+# Maximum age for jobs to be considered fresh (in days)
+MAX_AGE_FOR_JOB_IN_DAYS: int = 3
+
+
+#### Not sure if used
 
 # File to store applied jobs persistently
 APPLIED_JOBS_FILE = "applied_jobs.json"
@@ -46,14 +66,7 @@ TERMS_TO_EXCLUDE = set([
     "MACHINE LEARNING",  # Keep as exact phrase
     "MLOPS", 
     "DEVOPS",
-    "SALESFORCE"  # Added Salesforce
+    "SALESFORCE",
+    "DIRECTOR",
+    "HELP DESK"
 ])
-
-# Maximum age for jobs to be considered fresh (in days)
-MAX_AGE_FOR_JOB_IN_DAYS: int = 3
-
-# HTTP headers for API requests
-HEADERS = {
-    "User-Agent": "Job-Finder/1.0",
-    "Content-Type": "application/json"
-}

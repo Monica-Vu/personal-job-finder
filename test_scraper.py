@@ -282,6 +282,7 @@ class TestGetAvailableCompanies(unittest.TestCase):
         self.assertIn("crowdstrike", result)
         self.assertIn("remitly", result)
         self.assertIn("openlane", result)
+        self.assertIn("weir", result)
 
 
 class TestFetchWorkdayJobs(unittest.TestCase):
@@ -383,7 +384,8 @@ class TestSearchJobsForAllCompanies(unittest.TestCase):
             [{"title": "Clio Job"}],
             [{"title": "CrowdStrike Job"}],
             [{"title": "Remitly Job"}],
-            [{"title": "OpenLane Job"}]
+            [{"title": "OpenLane Job"}],
+            [{"title": "Weir Job"}]
         ]
         
         result = search_jobs_for_all_companies()
@@ -392,11 +394,13 @@ class TestSearchJobsForAllCompanies(unittest.TestCase):
         self.assertIn("crowdstrike", result)
         self.assertIn("remitly", result)
         self.assertIn("openlane", result)
+        self.assertIn("weir", result)
         self.assertEqual(len(result["clio"]), 1)
         self.assertEqual(len(result["crowdstrike"]), 1)
         self.assertEqual(len(result["remitly"]), 1)
         self.assertEqual(len(result["openlane"]), 1)
-        self.assertEqual(mock_search.call_count, 4)
+        self.assertEqual(len(result["weir"]), 1)
+        self.assertEqual(mock_search.call_count, 5)
 
 
 class TestPrintJobSummary(unittest.TestCase):
@@ -418,6 +422,9 @@ class TestPrintJobSummary(unittest.TestCase):
             ],
             "openlane": [
                 {"title": "Full Stack Developer"}
+            ],
+            "weir": [
+                {"title": "MotionMetrics Developer"}
             ]
         }
         

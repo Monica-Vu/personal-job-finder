@@ -1,7 +1,7 @@
 import re
 import requests
-from typing import Dict, List, Optional, Any
-from constants import APPLIED_JOBS, TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS, HEADERS, save_applied_jobs
+from typing import Dict, List, Optional, AnyHEADERS
+from constants import APPLIED_JOBS, TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS, , save_applied_jobs
 from company_configs import COMPANY_CONFIGS 
 
 def fetch_workday_jobs(company_key: str) -> Optional[List[Dict[str, Any]]]:
@@ -23,10 +23,15 @@ def fetch_workday_jobs(company_key: str) -> Optional[List[Dict[str, Any]]]:
     print(f"Searching for '{config.search_text}' jobs for {config.name}")
 
     # Build appliedFacets dynamically based on configuration
-    applied_facets = {
-        config.location_facet_key: config.location_ids,
-        config.job_family_facet_key: config.job_family_group
-    }
+    applied_facets = {}
+    
+    # Only add location facet if there are location IDs
+    if config.location_ids:
+        applied_facets[config.location_facet_key] = config.location_ids
+    
+    # Only add job family facet if there are job family groups
+    if config.job_family_group:
+        applied_facets[config.job_family_facet_key] = config.job_family_group
     
     # Add locationCountry facet if configured (for companies like Remitly)
     if config.location_country_ids:
@@ -80,7 +85,10 @@ def find_fresh_relevant_jobs(job_postings: List[Dict[str, Any]], company_name: s
             job_posted_days = extract_age_in_days(item)
             
             if job_posted_days is None:
-                print(f"Warning: Could not extract job age for job: {item.get('title', 'Unknown')}")
+                # If we can't determine the job age, include it anyway (for companies like Weir that don't provide dates)
+                print(f"Warning: Could not extract job age for job: {item.get('title', 'Unknown')} - including anyway")
+                if include_job(item, company_key) and is_relevant_job(item):
+                    relevant_jobs.append(item)
                 continue
                 
             job_posted_days = int(job_posted_days)
@@ -108,8 +116,8 @@ def extract_age_in_days(obj) -> None:
     # Ago             - The literal word "Ago"
     text = obj.get("postedOn", "")
 
-    if not text: 
-        return "No date for error" 
+    if not text or text == "Unknown Date": 
+        return None  # Return None instead of error string for missing dates
 
     if text == "Posted Today":
         return 0
@@ -142,8 +150,17 @@ def include_job(obj: Dict[str, Any], company_key: str) -> bool:
     if not job_id or len(job_id) == 0:
         return True
     
+    # Use the first bullet field as job ID (could be actual job ID or location)
+    # For companies like Weir that use location as bullet field, we'll use the job title as ID
+    potential_job_id = job_id[0]
+    
+    # If bullet field looks like a location (contains common location words), use title as ID
+    location_indicators = ["British Columbia", "Canada", "United States", "Remote", "Vancouver", "Toronto"]
+    if any(indicator in potential_job_id for indicator in location_indicators):
+        potential_job_id = obj.get("title", "Unknown Title")
+    
     # Check if this job ID has been applied to for this specific company
-    if company_key in APPLIED_JOBS and job_id[0] in APPLIED_JOBS[company_key]:
+    if company_key in APPLIED_JOBS and potential_job_id in APPLIED_JOBS[company_key]:
         return False
     
     return True
@@ -219,7 +236,7 @@ def clear_all_applied_jobs() -> None:
     save_applied_jobs()  # Save to persistent storage
     print("Cleared all applied jobs for all companies")
 
-def search_jobs_for_company(company_key: str) -> List[Dict[str, Any]]:
+def search_jobs_for_company(company_key: str) -> List[Dict[str, Any]] or None:
     """
     Search for jobs for a specific company
     
@@ -234,7 +251,7 @@ def search_jobs_for_company(company_key: str) -> List[Dict[str, Any]]:
         return []
     
     config = COMPANY_CONFIGS[company_key]
-    return find_fresh_relevant_jobs(job_postings, config.name, company_key)
+    # return find_fresh_relevant_jobs(job_postings, config.name, company_key)
 
 def search_jobs_for_all_companies() -> Dict[str, List[Dict[str, Any]]]:
     """
@@ -246,9 +263,10 @@ def search_jobs_for_all_companies() -> Dict[str, List[Dict[str, Any]]]:
     all_results = {}
     
     for company_key in COMPANY_CONFIGS.keys():
-        print(f"\n{'='*50}")
-        print(f"Searching {COMPANY_CONFIGS[company_key].name}")
-        print(f"{'='*50}")
+        # Uncomment for debugging purposes
+        # print(f"\n{'='*50}")
+        # print(f"Searching {COMPANY_CONFIGS[company_key].name}")
+        # print(f"{'='*50}")
         
         results = search_jobs_for_company(company_key)
         all_results[company_key] = results
@@ -276,9 +294,9 @@ def print_job_summary(all_results: Dict[str, List[Dict[str, Any]]]) -> None:
 # Main execution
 if __name__ == "__main__":
     # Example usage - search all companies
-    all_results = search_jobs_for_all_companies()
-    print_job_summary(all_results)
+    # all_results = search_jobs_for_all_companies()
+    # print_job_summary(all_results)
     
     # Example usage - search specific company
-    # results = search_jobs_for_company("clio")
+    results = search_jobs_for_company("clio")
     # print(f"Clio results: {results}")

@@ -96,7 +96,7 @@ print(results)
 ### Get Available Companies
 ```python
 companies = get_available_companies()
-print(companies)  # ['clio', 'new_company', ...]
+print(companies)  # ['clio', 'crowdstrike', 'remitly', 'openlane', 'weir']
 ```
 
 ## Job Tracking
