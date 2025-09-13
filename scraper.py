@@ -44,8 +44,6 @@ class JobScraper:
         """Main method to run the entire scraping and filtering process."""
         print("--- Starting Job Scraper ---")
         all_jobs = self._fetch_and_parse_all_jobs()
-
-        print(all_jobs)
         
         print(f"\n--- Found {len(all_jobs)} total jobs. Filtering... ---")
         fresh_jobs = self._filter_jobs(all_jobs)

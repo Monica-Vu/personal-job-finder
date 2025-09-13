@@ -141,12 +141,25 @@ COMPANY_CONFIGS = {
         parser_key="greenhouse",
         job_id_key="id",
         job_age_key= "first_published"
+    ),
+    "gitlab": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/gitlab/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key= "first_published"
+    ),
+    "brex": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/brex/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key= "first_published"
     )
 }
 
 """
  TODO: 
  - go through entire script
- - create a script to filter out jobs for greenhouse (location, title, requestion_id - ?)
 
  """
