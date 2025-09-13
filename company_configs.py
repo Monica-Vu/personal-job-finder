@@ -155,6 +155,20 @@ COMPANY_CONFIGS = {
         parser_key="greenhouse",
         job_id_key="id",
         job_age_key= "first_published"
+    ),
+    "affinity": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/affinity/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key= "first_published"
+    ),
+    "hootsuite": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/hootsuite/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key= "first_published"
     )
 }
 
