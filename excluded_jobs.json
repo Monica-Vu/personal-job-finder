@@ -1,6 +1,6 @@
 {
   "clio": {
-    "BF-REQ-3671": "Applied on September 11, 2025"
+    "BF-REQ-3671": "Applied on September 10, 2025"
   },
   "remitly": {
     "R_103932": true,
@@ -16,6 +16,10 @@
     "4897452008": true
   },
   "take-two": {
-    "R_116042": true
+    "7004260": true
+  },
+  "stripe": {
+    "6865161": "Not Qualified",
+    "7171251": "Not Qualified"
   }
 }

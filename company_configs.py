@@ -125,14 +125,21 @@ COMPANY_CONFIGS = {
         api_url="https://boards-api.greenhouse.io/v1/boards/taketwo/jobs",
         http_method="GET",
         parser_key="greenhouse",
-        job_id_key="requisition_id",
+        job_id_key="id",
         job_age_key= "first_published",
     ),
     "samsara": CompanyConfig(
         api_url="https://boards-api.greenhouse.io/v1/boards/samsara/jobs",
         http_method="GET",
         parser_key="greenhouse",
-        job_id_key="requisition_id",
+        job_id_key="id",
+        job_age_key= "first_published"
+    ),
+    "stripe": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/stripe/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
         job_age_key= "first_published"
     )
 }
