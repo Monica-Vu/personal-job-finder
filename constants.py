@@ -9,7 +9,7 @@ class JobPostingAgeKey(StrEnum):
     UPDATED_AT = "updated_at"
 
 # --- Filtering Configuration ---
-MAX_AGE_FOR_JOB_IN_DAYS: int = 25
+MAX_AGE_FOR_JOB_IN_DAYS: int = 3
 
 # Terms to exclude from job searches (in uppercase, as you prefer)
 TERMS_TO_EXCLUDE: Set[str] = {

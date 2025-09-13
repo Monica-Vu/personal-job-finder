@@ -50,7 +50,7 @@ class JobScraper:
                 raw_data = json.load(f)
                 return {company: set(job_ids) for company, job_ids in raw_data.items()}
         except (json.JSONDecodeError, IOError) as e:
-            print(f"⚠️ Warning: Could not load applied jobs file: {e}")
+            print(f"Warning: Could not load applied jobs file: {e}")
             return {}
 
     def save_applied_jobs(self):
@@ -72,11 +72,11 @@ class JobScraper:
         fresh_jobs = self._filter_jobs(all_jobs)
 
         if fresh_jobs:
-            print(f"\n✅ Found {len(fresh_jobs)} new, relevant jobs to review:")
+            print(f"\n Found {len(fresh_jobs)} new, relevant jobs to review:")
             for job in fresh_jobs:
                 print(f"  - {job.title} at {job.company.title()} ({job.location})")
         else:
-            print("\n😔 No new relevant jobs found.")
+            print("\nNo new relevant jobs found.")
 
     def _fetch_and_parse_all_jobs(self) -> List[JobPosting]:
         all_parsed_jobs = []
@@ -131,7 +131,7 @@ class JobScraper:
                 location=raw_job.get("locationsText"),
                 posted_date=self._parse_date(raw_job.get(config.job_age_key))
             ))
-            print("jobs =>", jobs)
+
         return jobs
 
     def _parse_greenhouse_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
