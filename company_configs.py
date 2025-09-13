@@ -114,8 +114,32 @@ COMPANY_CONFIGS = {
     #     "searchText": "Software+Developer"
     #     }
     # ),
+    "unbounce": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/unbounce/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key= "first_published",
+    ),
+    "take-two": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/taketwo/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="requisition_id",
+        job_age_key= "first_published",
+    ),
     "samsara": CompanyConfig(
-        api_url="https://boards-api.greenhouse.io/v1/boards/6704843/jobs",
-        parser_key="greenhouse"
+        api_url="https://boards-api.greenhouse.io/v1/boards/samsara/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="requisition_id",
+        job_age_key= "first_published"
     )
 }
+
+"""
+ TODO: 
+ - go through entire script
+ - create a script to filter out jobs for greenhouse (location, title, requestion_id - ?)
+
+ """

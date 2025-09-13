@@ -6,32 +6,9 @@ import os
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Set
 from company_configs import COMPANY_CONFIGS, CompanyConfig
-# Import from our other project files
-from constants import TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS, APPLIED_JOBS_FILE
+# Import from our other  project files
+from constants import EXCLUDE_LOCATION_KEY_WORDS, TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS, APPLIED_JOBS_FILE, LOCATION_KEY_WORDS
 from models import JobPosting
-
-#     "clio": CompanyConfig(
-#         api_url="https://clio.wd3.myworkdayjobs.com/wday/cxs/clio/ClioCareerSite/jobs",
-#         body={"searchText": "Software Developer", "limit": 20},
-#         parser_key="workday",
-#         job_id_key="bulletFields",
-#         job_age_key=JobPostingAgeKey.POSTED_ON
-#     ),
-#     "crowdstrike": CompanyConfig(
-#         api_url="https://crowdstrike.wd5.myworkdayjobs.com/wday/cxs/crowdstrike/crowdstrikecareers/jobs",
-#         body={"limit": 20, "searchText": "Software"},
-#         parser_key="workday",
-#         job_id_key="jobRequisitionId",
-#         job_age_key=JobPostingAgeKey.POSTED_ON
-#     ),
-#     "affinity": CompanyConfig(
-#         api_url="https://boards-api.greenhouse.io/v1/boards/affinity/jobs",
-#         http_method="GET",
-#         parser_key="greenhouse",
-#         job_id_key="id",
-#         job_age_key=JobPostingAgeKey.UPDATED_AT
-#     )
-# }
 
 # --- Main Application Class ---
 class JobScraper:
@@ -67,6 +44,8 @@ class JobScraper:
         """Main method to run the entire scraping and filtering process."""
         print("--- Starting Job Scraper ---")
         all_jobs = self._fetch_and_parse_all_jobs()
+
+        print(all_jobs)
         
         print(f"\n--- Found {len(all_jobs)} total jobs. Filtering... ---")
         fresh_jobs = self._filter_jobs(all_jobs)
@@ -133,14 +112,33 @@ class JobScraper:
             ))
 
         return jobs
+    
+    def _filter_gh_jobs_by_location(self, jobs):
+        result = []
+
+        included_areas = [kw.upper() for kw in LOCATION_KEY_WORDS]
+        excluded_areas = [kw.upper() for kw in EXCLUDE_LOCATION_KEY_WORDS]
+
+        for raw_job in jobs: 
+            location_name = raw_job.get('location', {}).get('name','').upper()
+
+            valid_locations = any(kw in location_name for kw in included_areas)
+            invalid_locations = any(kw in location_name for kw in excluded_areas)
+
+            if valid_locations and not invalid_locations:
+                result.append(raw_job)
+        return result 
 
     def _parse_greenhouse_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
-        jobs = []
-        for raw_job in data.get("jobs", []):
+        result = []
+        jobs = data.get("jobs", [])
+        location_relevant_jobs = self._filter_gh_jobs_by_location(jobs)
+
+        for raw_job in location_relevant_jobs:
             job_id = str(raw_job.get(config.job_id_key, ""))
             if not job_id: continue
 
-            jobs.append(JobPosting(
+            result.append(JobPosting(
                 company=company,
                 job_id=job_id,
                 title=raw_job.get("title"),
@@ -148,7 +146,7 @@ class JobScraper:
                 location=raw_job.get("location", {}).get("name"),
                 posted_date=self._parse_date(raw_job.get(config.job_age_key))
             ))
-        return jobs
+        return result
 
     def _is_relevant_title(self, title: Optional[str]) -> bool:
         """Efficiently checks if a title contains excluded terms using uppercase."""
