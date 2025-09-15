@@ -184,6 +184,37 @@ COMPANY_CONFIGS = {
         },
         job_age_key=JobPostingAgeKey.POSTED_ON
     ),
+    "flexera": CompanyConfig(
+        api_url="https://flexerasoftware.wd1.myworkdayjobs.com/wday/cxs/flexerasoftware/FlexeraSoftware/jobs",
+        body= {
+        "appliedFacets": {
+            "locationCountry": [
+                "a30a87ed25634629aa6c3958aa2b91ea"
+            ]
+        },
+        "limit": 20,
+        "offset": 0,
+        "searchText": ""
+        },
+        job_age_key=JobPostingAgeKey.POSTED_ON
+    ),
+    "ticketmaster": CompanyConfig(
+        api_url="https://livenation.wd1.myworkdayjobs.com/wday/cxs/livenation/TMExternalSite/jobs",
+        body={
+        "appliedFacets": {
+            "jobFamilyGroup": [
+                "def6fe28d9a210a6e1ddb30d81afbf0e"
+            ],
+            "Location_Country": [
+                "a30a87ed25634629aa6c3958aa2b91ea"
+            ]
+        },
+        "limit": 20,
+        "offset": 0,
+        "searchText": ""
+        },
+        job_age_key=JobPostingAgeKey.POSTED_ON
+    ),
     ### GREENHOUSE 
     "unbounce": CompanyConfig(
         api_url="https://boards-api.greenhouse.io/v1/boards/unbounce/jobs",
