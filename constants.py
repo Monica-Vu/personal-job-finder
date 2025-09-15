@@ -20,7 +20,8 @@ TERMS_TO_EXCLUDE: Set[str] = {
     "MACHINE LEARNING", "MLOPS", "DEVOPS", "SALESFORCE",
     "DIRECTOR", "HELP DESK", "VP", "EXECUTIVE", "CO-OP",
     "COOP", "INTERN", "SALES", 'ASSISTANT', "SUPERVISOR",
-    "RESEARCHER", "ANDROID", "HEAD", "LEAD"
+    "RESEARCHER", "ANDROID", "HEAD", "LEAD", 'MANAGEMENT',
+    "PRINCIPAL", "DESIGNER", "ARCHITECT"
 }
 
 # --- File paths ---
@@ -30,3 +31,5 @@ LOCATION_KEY_WORDS = ["VANCOUVER", "BURNABY", "CANADA"]
 
 EXCLUDE_LOCATION_KEY_WORDS = ["TORONTO", "MONTREAL",
                               "OTTAWA", "CALGARY", "ONTARIO", "ALBERTA", "QUEBEC"]
+
+# TODO: think about the logic above more. Some places do list multiple offices or do "Remote Canada" (or something similar)

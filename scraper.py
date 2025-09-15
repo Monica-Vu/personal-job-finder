@@ -148,8 +148,9 @@ class JobScraper:
 
     def _is_relevant_title(self, title: Optional[str]) -> bool:
         """Efficiently checks if a title contains excluded terms using uppercase."""
-        if not title: return False
-        # Using .upper() as you prefer
+        if not title: 
+            return False
+
         words_in_title = set(re.split(r'\W+', title.upper()))
         return not TERMS_TO_EXCLUDE.intersection(words_in_title)
 

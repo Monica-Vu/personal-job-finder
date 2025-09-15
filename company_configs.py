@@ -19,6 +19,7 @@ class CompanyConfig:
     
 # Company configurations - add new companies here
 COMPANY_CONFIGS = {
+    ### WORKDAY 
     "clio": CompanyConfig(
         api_url="https://clio.wd3.myworkdayjobs.com/wday/cxs/clio/ClioCareerSite/jobs",
         body={
@@ -114,6 +115,76 @@ COMPANY_CONFIGS = {
         "searchText": "Software+Developer"
         }
     ),
+    "accolade": CompanyConfig(
+        api_url="https://osv-accolade.wd5.myworkdayjobs.com/wday/cxs/osv_accolade/External_Careers/jobs",
+        body= {
+        "appliedFacets": {
+            "jobFamilyGroup": [
+                "591060563623017f6db55ba7fd6b24f0"
+            ],
+            "primaryLocation": [
+                "2f2b3b9e18dc0199117b8d94ec01725e"
+            ]
+        },
+        "limit": 20,
+        "offset": 0,
+        "searchText": ""
+        }
+    ),
+    "workday": CompanyConfig(
+        api_url="https://workday.wd5.myworkdayjobs.com/wday/cxs/workday/Workday/jobs",
+        body={
+        "appliedFacets": {
+            "jobFamilyGroup": [
+                "a88cba90a00841e0b750341c541b9d56",
+                "11d42f4a487c46b9b29ab3e087c2f5ca",
+                "8c5ce7a1cffb43e0a819c249a49fcb00"
+            ],
+            "locations": [
+                "2dbd309d3ef64fffb7131f8b596a774a"
+            ]
+        },
+        "limit": 20,
+        "offset": 0,
+        "searchText": ""
+        },
+        job_age_key=JobPostingAgeKey.POSTED_ON
+    ),
+    "autodesk": CompanyConfig(
+        api_url="https://autodesk.wd1.myworkdayjobs.com/wday/cxs/autodesk/Ext/jobs",
+        body={
+        "appliedFacets": {
+            "locations": [
+                "dc0c7cba54ea1000a5a4d48e95d30000"
+            ],
+            "locationCountry": [
+                "a30a87ed25634629aa6c3958aa2b91ea"
+            ],
+            "jobFamilyGroup": [
+                "1f75c4299c9201c0f3b5f8e6fa01c5bf"
+            ]
+        },
+        "limit": 20,
+        "offset": 0,
+        "searchText": ""
+        },
+        job_age_key=JobPostingAgeKey.POSTED_ON
+    ),
+    "bcca": CompanyConfig(
+        api_url="https://bcaa.wd3.myworkdayjobs.com/wday/cxs/bcaa/bcaacareers/jobs",
+        body= {
+        "appliedFacets": {
+            "jobFamilyGroup": [
+                "25ae589691dd01fe130456399749e007"
+            ]
+        },
+        "limit": 20,
+        "offset": 0,
+        "searchText": ""
+        },
+        job_age_key=JobPostingAgeKey.POSTED_ON
+    ),
+    ### GREENHOUSE 
     "unbounce": CompanyConfig(
         api_url="https://boards-api.greenhouse.io/v1/boards/unbounce/jobs",
         http_method="GET",
@@ -184,6 +255,20 @@ COMPANY_CONFIGS = {
         job_id_key="id",
         job_age_key= "first_published"
     ),
+    "instacart": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/instacart/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key= "first_published"
+    ),
+    "coalition": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/coalition/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key= "first_published"
+    )
 }
 
 """
