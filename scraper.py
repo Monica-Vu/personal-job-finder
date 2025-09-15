@@ -175,7 +175,6 @@ class JobScraper:
             if job.job_id in self.applied_ids_by_company.get(job.company, set()):
                 continue
             if not self._is_relevant_title(job.title):
-                print("job title", job.title)
                 continue
             # This logic now KEEPS jobs with no date
             if job.posted_date and (today - job.posted_date).days > MAX_AGE_FOR_JOB_IN_DAYS:

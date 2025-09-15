@@ -308,6 +308,13 @@ COMPANY_CONFIGS = {
         parser_key="greenhouse",
         job_id_key="id",
         job_age_key="first_published"
+    ),
+    "leagueinc": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/leagueinc/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published"
     )
 }
 
