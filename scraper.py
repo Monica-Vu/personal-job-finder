@@ -32,7 +32,8 @@ class JobScraper:
 
     def save_applied_jobs(self):
         """Saves the current state of applied jobs to the JSON file."""
-        data_to_save = {company: list(job_ids) for company, job_ids in self.applied_ids_by_company.items()}
+        data_to_save = {company: list(
+            job_ids) for company, job_ids in self.applied_ids_by_company.items()}
         try:
             with open(APPLIED_JOBS_FILE, 'w') as f:
                 json.dump(data_to_save, f, indent=2)
@@ -44,14 +45,15 @@ class JobScraper:
         """Main method to run the entire scraping and filtering process."""
         print("--- Starting Job Scraper ---")
         all_jobs = self._fetch_and_parse_all_jobs()
-        
+
         print(f"\n--- Found {len(all_jobs)} total jobs. Filtering... ---")
         fresh_jobs = self._filter_jobs(all_jobs)
 
         if fresh_jobs:
             print(f"\n Found {len(fresh_jobs)} new, relevant jobs to review:")
             for job in fresh_jobs:
-                print(f"  - {job.title} at {job.company.title()} ({job.location})")
+                print(
+                    f"  - {job.title} at {job.company.title()} ({job.location})")
         else:
             print("\nNo new relevant jobs found.")
 
@@ -61,11 +63,12 @@ class JobScraper:
             print(f"Fetching jobs for {name.title()}...")
             try:
                 if config.http_method.upper() == "POST":
-                    response = self.session.post(config.api_url, json=config.body, timeout=10)
+                    response = self.session.post(
+                        config.api_url, json=config.body, timeout=10)
                 else:
                     response = self.session.get(config.api_url, timeout=10)
                 response.raise_for_status()
-                
+
                 parsed = self._parse_response(name, config, response.json())
                 all_parsed_jobs.extend(parsed)
             except requests.exceptions.RequestException as e:
@@ -83,23 +86,28 @@ class JobScraper:
 
     def _parse_date(self, date_value: Optional[str]) -> Optional[datetime]:
         """Parses a date that can be an ISO timestamp or a relative string."""
-        if not isinstance(date_value, str): return None
+        if not isinstance(date_value, str):
+            return None
         try:
             return datetime.fromisoformat(date_value.replace("Z", "+00:00"))
         except ValueError:
             date_str_lower = date_value.lower()
-            if "today" in date_str_lower: return datetime.now(timezone.utc)
-            if "yesterday" in date_str_lower: return datetime.now(timezone.utc) - timedelta(days=1)
+            if "today" in date_str_lower:
+                return datetime.now(timezone.utc)
+            if "yesterday" in date_str_lower:
+                return datetime.now(timezone.utc) - timedelta(days=1)
             match = re.search(r'(\d+)\+?\s+days?\s+ago', date_str_lower)
-            if match: return datetime.now(timezone.utc) - timedelta(days=int(match.group(1)))
+            if match:
+                return datetime.now(timezone.utc) - timedelta(days=int(match.group(1)))
         return None
 
     def _parse_workday_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
         jobs = []
         for raw_job in data.get("jobPostings", []):
             job_id_list = raw_job.get(config.job_id_key, [])
-            if not job_id_list: continue
-            
+            if not job_id_list:
+                continue
+
             jobs.append(JobPosting(
                 company=company,
                 job_id=job_id_list[0],
@@ -110,22 +118,23 @@ class JobScraper:
             ))
 
         return jobs
-    
+
     def _filter_gh_jobs_by_location(self, jobs):
         result = []
 
         included_areas = [kw.upper() for kw in LOCATION_KEY_WORDS]
         excluded_areas = [kw.upper() for kw in EXCLUDE_LOCATION_KEY_WORDS]
 
-        for raw_job in jobs: 
-            location_name = raw_job.get('location', {}).get('name','').upper()
+        for raw_job in jobs:
+            location_name = raw_job.get('location', {}).get('name', '').upper()
 
             valid_locations = any(kw in location_name for kw in included_areas)
-            invalid_locations = any(kw in location_name for kw in excluded_areas)
+            invalid_locations = any(
+                kw in location_name for kw in excluded_areas)
 
             if valid_locations and not invalid_locations:
                 result.append(raw_job)
-        return result 
+        return result
 
     def _parse_greenhouse_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
         result = []
@@ -134,7 +143,8 @@ class JobScraper:
 
         for raw_job in location_relevant_jobs:
             job_id = str(raw_job.get(config.job_id_key, ""))
-            if not job_id: continue
+            if not job_id:
+                continue
 
             result.append(JobPosting(
                 company=company,
@@ -148,29 +158,33 @@ class JobScraper:
 
     def _is_relevant_title(self, title: Optional[str]) -> bool:
         """Efficiently checks if a title contains excluded terms using uppercase."""
-        if not title: 
+        if not title:
             return False
 
-        words_in_title = set(re.split(r'\W+', title.upper()))
-        return not TERMS_TO_EXCLUDE.intersection(words_in_title)
+        title_upper = title.upper()
+        to_exclude = any(term in title_upper for term in TERMS_TO_EXCLUDE)
+        
+        return not to_exclude
 
     def _filter_jobs(self, jobs: List[JobPosting]) -> List[JobPosting]:
         """Filters a list of JobPosting objects through a pipeline of checks."""
         final_jobs = []
         today = datetime.now(timezone.utc)
-        
+
         for job in jobs:
             if job.job_id in self.applied_ids_by_company.get(job.company, set()):
                 continue
             if not self._is_relevant_title(job.title):
+                print("job title", job.title)
                 continue
             # This logic now KEEPS jobs with no date
             if job.posted_date and (today - job.posted_date).days > MAX_AGE_FOR_JOB_IN_DAYS:
                 continue
-            
+
             final_jobs.append(job)
-                
+
         return final_jobs
+
 
 if __name__ == "__main__":
     scraper = JobScraper(COMPANY_CONFIGS)
