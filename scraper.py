@@ -1,14 +1,14 @@
 # main.py
-import requests
+import sys 
 import re
 import json
 import os
-from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Set
+from datetime import datetime, timezone, timedelta
 from company_configs import COMPANY_CONFIGS, CompanyConfig
-# Import from our other  project files
 from constants import EXCLUDE_LOCATION_KEY_WORDS, TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS, APPLIED_JOBS_FILE, LOCATION_KEY_WORDS
 from models import JobPosting
+import requests
 
 # --- Main Application Class ---
 class JobScraper:
@@ -41,10 +41,18 @@ class JobScraper:
         except IOError as e:
             print(f"❌ Error: Could not save applied jobs: {e}")
 
-    def run(self):
+    def run(self, specific_companies: Optional[List[str]] = None):
         """Main method to run the entire scraping and filtering process."""
+        companies_to_scrape = self.configs
+
+        if specific_companies:
+            companies_to_scrape = {
+                name: config for name, config in self.configs.items() 
+                if name in specific_companies
+            }
+
         print("--- Starting Job Scraper ---")
-        all_jobs = self._fetch_and_parse_all_jobs()
+        all_jobs = self._fetch_and_parse_all_jobs(companies_to_scrape)
 
         print(f"\n--- Found {len(all_jobs)} total jobs. Filtering... ---")
         fresh_jobs = self._filter_jobs(all_jobs)
@@ -57,9 +65,9 @@ class JobScraper:
         else:
             print("\nNo new relevant jobs found.")
 
-    def _fetch_and_parse_all_jobs(self) -> List[JobPosting]:
+    def _fetch_and_parse_all_jobs(self, companies_to_scrape: Dict[str, CompanyConfig]) -> List[JobPosting]:
         all_parsed_jobs = []
-        for name, config in self.configs.items():
+        for name, config in companies_to_scrape.items():
             print(f"Fetching jobs for {name.title()}...")
             try:
                 if config.http_method.upper() == "POST":
@@ -186,5 +194,10 @@ class JobScraper:
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        specific_companies = sys.argv[1:]
+    else:
+        specific_companies = None
+
     scraper = JobScraper(COMPANY_CONFIGS)
-    scraper.run()
+    scraper.run(specific_companies=specific_companies)

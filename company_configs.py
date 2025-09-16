@@ -1,13 +1,7 @@
-"""
-Company configurations for Workday job boards
-"""
-
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
 from constants import JobPostingAgeKey
 
-
-@dataclass
 @dataclass
 class CompanyConfig:
     """Configuration for a single company's job API."""
@@ -311,6 +305,13 @@ COMPANY_CONFIGS = {
     ),
     "leagueinc": CompanyConfig(
         api_url="https://boards-api.greenhouse.io/v1/boards/leagueinc/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published"
+    ),
+    "shift4": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/shift4/jobs",
         http_method="GET",
         parser_key="greenhouse",
         job_id_key="id",
