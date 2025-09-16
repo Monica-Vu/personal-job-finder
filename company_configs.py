@@ -316,7 +316,28 @@ COMPANY_CONFIGS = {
         parser_key="greenhouse",
         job_id_key="id",
         job_age_key="first_published"
-    )
+    ),
+    "benevity": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/benevity/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published"
+    ),
+    "launchpotato": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/launchpotato/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published"
+    ),
+    "earnin": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/earnin/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published"
+    ),
 }
 
 """
