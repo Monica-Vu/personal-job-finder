@@ -1,16 +1,16 @@
 # main.py
-import sys 
+import sys
 import re
 import json
 import os
 from typing import Any, Dict, List, Optional, Set
 from datetime import datetime, timezone, timedelta
 from company_configs import COMPANY_CONFIGS, CompanyConfig
-from constants import EXCLUDE_LOCATION_KEY_WORDS, TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS, APPLIED_JOBS_FILE, LOCATION_KEY_WORDS
+from constants import EXCLUDE_LOCATION_KEY_WORDS, TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS, APPLIED_JOBS_FILE, LOCATION_KEY_WORDS, TIMESTAMP_MILLISECOND_THRESHOLD, MILLISECONDS_PER_SECOND
 from models import JobPosting
 import requests
 
-# --- Main Application Class ---
+
 class JobScraper:
     def __init__(self, configs: dict):
         self.configs = configs
@@ -47,7 +47,7 @@ class JobScraper:
 
         if specific_companies:
             companies_to_scrape = {
-                name: config for name, config in self.configs.items() 
+                name: config for name, config in self.configs.items()
                 if name in specific_companies
             }
 
@@ -94,21 +94,51 @@ class JobScraper:
         print(f"  No parser found for key: {config.parser_key}")
         return []
 
-    def _parse_date(self, date_value: Optional[str]) -> Optional[datetime]:
-        """Parses a date that can be an ISO timestamp or a relative string."""
-        if not isinstance(date_value, str):
-            return None
+    def _parse_date(self, date_value: Optional[Any]) -> Optional[datetime]:
+        parsed_date = self._parse_unix_timestamp(date_value)
+
+        if parsed_date:
+            return parsed_date
+
+        if isinstance(date_value, str):
+            return self._parse_iso_string(date_value) or self._parse_relative_string(date_value)
+        
+        return None
+    
+    def _parse_unix_timestamp(self, timestamp: Optional[Any]) -> Optional[datetime]: 
+        if timestamp is None:
+            return None 
+
+        try: 
+            timestamp_float = float(timestamp)
+        except (ValueError, TypeError):
+            return None 
+
         try:
-            return datetime.fromisoformat(date_value.replace("Z", "+00:00"))
+            if timestamp_float > TIMESTAMP_MILLISECOND_THRESHOLD:
+                timestamp_float /= MILLISECONDS_PER_SECOND
+            return datetime.fromtimestamp(timestamp_float, tz=timezone.utc)
+        
+        except (ValueError, OSError):
+            return None
+    
+    def _parse_iso_string(self, date_str: str) -> Optional[datetime]: 
+        try: 
+            return datetime.fromisoformat(date_str.replace("Z", "+00:00"))
         except ValueError:
-            date_str_lower = date_value.lower()
-            if "today" in date_str_lower:
-                return datetime.now(timezone.utc)
-            if "yesterday" in date_str_lower:
-                return datetime.now(timezone.utc) - timedelta(days=1)
-            match = re.search(r'(\d+)\+?\s+days?\s+ago', date_str_lower)
-            if match:
-                return datetime.now(timezone.utc) - timedelta(days=int(match.group(1)))
+            return None 
+    
+    def _parse_relative_string(self, date_str: str) -> Optional[datetime]:
+        date_str_lower = date_str.lower()
+        if "today" in date_str_lower:
+            return datetime.now(timezone.utc)
+        if "yesterday" in date_str_lower:
+            return datetime.now(timezone.utc) - timedelta(days=1)
+        
+        match = re.search(r'(\d+)\+?\s+days?\s+ago', date_str_lower)
+        if match:
+            return datetime.now(timezone.utc) - timedelta(days=int(match.group(1)))
+            
         return None
 
     def _parse_workday_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
@@ -179,11 +209,7 @@ class JobScraper:
                 posted_date=self._parse_date(raw_job.get(config.job_age_key))
             ))
 
-        print("result =>", result)
-
-        return result 
-
-        
+        return result
 
     def _is_relevant_title(self, title: Optional[str]) -> bool:
         """Efficiently checks if a title contains excluded terms using uppercase."""
@@ -192,7 +218,7 @@ class JobScraper:
 
         title_upper = title.upper()
         to_exclude = any(term in title_upper for term in TERMS_TO_EXCLUDE)
-        
+               
         return not to_exclude
 
     def _filter_jobs(self, jobs: List[JobPosting]) -> List[JobPosting]:
@@ -216,9 +242,9 @@ class JobScraper:
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        specific_companies = sys.argv[1:]
+        company_list = sys.argv[1:]
     else:
-        specific_companies = None
+        company_list = None
 
     scraper = JobScraper(COMPANY_CONFIGS)
-    scraper.run(specific_companies=specific_companies)
+    scraper.run(specific_companies=company_list)
