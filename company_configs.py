@@ -338,6 +338,14 @@ COMPANY_CONFIGS = {
         job_id_key="id",
         job_age_key="first_published"
     ),
+    ### LEVER 
+    "jane": CompanyConfig(
+        api_url="https://api.lever.co/v0/postings/janeapp?location=Canada&team=Software%20Development",
+        http_method="GET",
+        parser_key="lever",
+        job_id_key="createdAt",
+        job_age_key="text"
+    )
 }
 
 """

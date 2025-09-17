@@ -89,6 +89,8 @@ class JobScraper:
             return self._parse_workday_jobs(company, config, data)
         elif config.parser_key == "greenhouse":
             return self._parse_greenhouse_jobs(company, config, data)
+        elif config.parser_key == "lever":
+            return self._parse_lever_jobs(company, config, data)
         print(f"  No parser found for key: {config.parser_key}")
         return []
 
@@ -163,6 +165,25 @@ class JobScraper:
                 posted_date=self._parse_date(raw_job.get(config.job_age_key))
             ))
         return result
+    
+    def _parse_lever_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
+        result = []
+
+        for raw_job in data: 
+            result.append(JobPosting(
+                company=company, 
+                job_id=raw_job.get("id"),
+                title=raw_job.get("text"),
+                url=raw_job.get("applyUrl"),
+                location=raw_job.get("categories", {}).get("location"),
+                posted_date=self._parse_date(raw_job.get(config.job_age_key))
+            ))
+
+        print("result =>", result)
+
+        return result 
+
+        
 
     def _is_relevant_title(self, title: Optional[str]) -> bool:
         """Efficiently checks if a title contains excluded terms using uppercase."""
