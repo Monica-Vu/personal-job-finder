@@ -10,7 +10,6 @@ from constants import EXCLUDE_LOCATION_KEY_WORDS, TERMS_TO_EXCLUDE, MAX_AGE_FOR_
 from models import JobPosting
 import requests
 
-
 class JobScraper:
     def __init__(self, configs: dict):
         self.configs = configs

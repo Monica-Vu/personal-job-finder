@@ -211,6 +211,24 @@ COMPANY_CONFIGS = {
         },
         job_age_key=JobPostingAgeKey.POSTED_ON
     ),
+    "arcticwolf": CompanyConfig(
+        api_url="https://arcticwolf.wd1.myworkdayjobs.com/wday/cxs/arcticwolf/External/jobs",
+        body= {
+        "appliedFacets": {
+            "locations": [
+                "f6cfbd603ca11001f6248a5f81c80000"
+            ],
+            "jobFamilyGroup": [
+                "f6cfbd603ca11001ed8fdbe0fca80000"
+            ]
+        },
+        "limit": 20,
+        "offset": 0,
+        "searchText": ""
+        },
+        job_age_key="JobPostingAgeKey.POSTED_ON"
+    ),
+
     # GREENHOUSE
     "take-two": CompanyConfig(
         api_url="https://boards-api.greenhouse.io/v1/boards/taketwo/jobs",
@@ -333,6 +351,20 @@ COMPANY_CONFIGS = {
     ),
     "earnin": CompanyConfig(
         api_url="https://boards-api.greenhouse.io/v1/boards/earnin/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published"
+    ),
+    "destinationcanada": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/destinationcanada/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published"
+    ),
+    "workstream": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/workstream/jobs",
         http_method="GET",
         parser_key="greenhouse",
         job_id_key="id",
