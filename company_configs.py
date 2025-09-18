@@ -370,6 +370,13 @@ COMPANY_CONFIGS = {
         job_id_key="id",
         job_age_key="first_published"
     ),
+    "visier": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/visiersolutionsinc/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published"
+    ),
     ### LEVER 
     "jane": CompanyConfig(
         api_url="https://api.lever.co/v0/postings/janeapp?location=Canada&team=Software%20Development",

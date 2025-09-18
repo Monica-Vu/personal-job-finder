@@ -1,4 +1,6 @@
 # main.py
+import requests
+from models import JobPosting
 import sys
 import re
 import json
@@ -6,9 +8,9 @@ import os
 from typing import Any, Dict, List, Optional, Set
 from datetime import datetime, timezone, timedelta
 from company_configs import COMPANY_CONFIGS, CompanyConfig
-from constants import EXCLUDE_LOCATION_KEY_WORDS, TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS, APPLIED_JOBS_FILE, LOCATION_KEY_WORDS, TIMESTAMP_MILLISECOND_THRESHOLD, MILLISECONDS_PER_SECOND
-from models import JobPosting
-import requests
+from constants import EXCLUDE_LOCATION_KEY_WORDS, TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS,
+APPLIED_JOBS_FILE, LOCATION_KEY_WORDS, TIMESTAMP_MILLISECOND_THRESHOLD, MILLISECONDS_PER_SECOND
+
 
 class JobScraper:
     def __init__(self, configs: dict):
@@ -101,43 +103,43 @@ class JobScraper:
 
         if isinstance(date_value, str):
             return self._parse_iso_string(date_value) or self._parse_relative_string(date_value)
-        
-        return None
-    
-    def _parse_unix_timestamp(self, timestamp: Optional[Any]) -> Optional[datetime]: 
-        if timestamp is None:
-            return None 
 
-        try: 
+        return None
+
+    def _parse_unix_timestamp(self, timestamp: Optional[Any]) -> Optional[datetime]:
+        if timestamp is None:
+            return None
+
+        try:
             timestamp_float = float(timestamp)
         except (ValueError, TypeError):
-            return None 
+            return None
 
         try:
             if timestamp_float > TIMESTAMP_MILLISECOND_THRESHOLD:
                 timestamp_float /= MILLISECONDS_PER_SECOND
             return datetime.fromtimestamp(timestamp_float, tz=timezone.utc)
-        
+
         except (ValueError, OSError):
             return None
-    
-    def _parse_iso_string(self, date_str: str) -> Optional[datetime]: 
-        try: 
+
+    def _parse_iso_string(self, date_str: str) -> Optional[datetime]:
+        try:
             return datetime.fromisoformat(date_str.replace("Z", "+00:00"))
         except ValueError:
-            return None 
-    
+            return None
+
     def _parse_relative_string(self, date_str: str) -> Optional[datetime]:
         date_str_lower = date_str.lower()
         if "today" in date_str_lower:
             return datetime.now(timezone.utc)
         if "yesterday" in date_str_lower:
             return datetime.now(timezone.utc) - timedelta(days=1)
-        
+
         match = re.search(r'(\d+)\+?\s+days?\s+ago', date_str_lower)
         if match:
             return datetime.now(timezone.utc) - timedelta(days=int(match.group(1)))
-            
+
         return None
 
     def _parse_workday_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
@@ -194,13 +196,13 @@ class JobScraper:
                 posted_date=self._parse_date(raw_job.get(config.job_age_key))
             ))
         return result
-    
+
     def _parse_lever_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
         result = []
 
-        for raw_job in data: 
+        for raw_job in data:
             result.append(JobPosting(
-                company=company, 
+                company=company,
                 job_id=raw_job.get("id"),
                 title=raw_job.get("text"),
                 url=raw_job.get("applyUrl"),
@@ -217,7 +219,7 @@ class JobScraper:
 
         title_upper = title.upper()
         to_exclude = any(term in title_upper for term in TERMS_TO_EXCLUDE)
-               
+
         return not to_exclude
 
     def _filter_jobs(self, jobs: List[JobPosting]) -> List[JobPosting]:
