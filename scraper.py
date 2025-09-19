@@ -8,9 +8,7 @@ import os
 from typing import Any, Dict, List, Optional, Set
 from datetime import datetime, timezone, timedelta
 from company_configs import COMPANY_CONFIGS, CompanyConfig
-from constants import EXCLUDE_LOCATION_KEY_WORDS, TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS,
-APPLIED_JOBS_FILE, LOCATION_KEY_WORDS, TIMESTAMP_MILLISECOND_THRESHOLD, MILLISECONDS_PER_SECOND
-
+from constants import EXCLUDE_LOCATION_KEY_WORDS, TERMS_TO_EXCLUDE, MAX_AGE_FOR_JOB_IN_DAYS, APPLIED_JOBS_FILE, LOCATION_KEY_WORDS, TIMESTAMP_MILLISECOND_THRESHOLD, MILLISECONDS_PER_SECOND
 
 class JobScraper:
     def __init__(self, configs: dict):

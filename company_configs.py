@@ -377,9 +377,23 @@ COMPANY_CONFIGS = {
         job_id_key="id",
         job_age_key="first_published"
     ),
+    "coinbase": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/coinbase/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published"
+    ),
     ### LEVER 
     "jane": CompanyConfig(
         api_url="https://api.lever.co/v0/postings/janeapp?location=Canada&team=Software%20Development",
+        http_method="GET",
+        parser_key="lever",
+        job_id_key="text",
+        job_age_key="createdAt"
+    ),
+    "xero": CompanyConfig(
+        api_url="https://api.lever.co/v0/postings/xero?location=Vancouver,%20CA&team=Engineering&department=Technology",
         http_method="GET",
         parser_key="lever",
         job_id_key="text",
