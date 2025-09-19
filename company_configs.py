@@ -384,6 +384,13 @@ COMPANY_CONFIGS = {
         job_id_key="id",
         job_age_key="first_published"
     ),
+    "sproutsocial": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/sproutsocial/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published"
+    ),
     ### LEVER 
     "jane": CompanyConfig(
         api_url="https://api.lever.co/v0/postings/janeapp?location=Canada&team=Software%20Development",
@@ -393,7 +400,21 @@ COMPANY_CONFIGS = {
         job_age_key="createdAt"
     ),
     "xero": CompanyConfig(
-        api_url="https://api.lever.co/v0/postings/xero?location=Vancouver,%20CA&team=Engineering&department=Technology",
+        api_url="https://api.lever.co/v0/postings/xero?location=Vancouver,%20CA&team=Engineering",
+        http_method="GET",
+        parser_key="lever",
+        job_id_key="text",
+        job_age_key="createdAt"
+    ),
+    "super.com": CompanyConfig(
+        api_url="https://api.lever.co/v0/postings/super-com?location=Canada&team=Engineering",
+        http_method="GET",
+        parser_key="lever",
+        job_id_key="text",
+        job_age_key="createdAt"
+    ), 
+    "wealthsimple": CompanyConfig(
+        api_url="https://api.lever.co/v0/postings/wealthsimple?location=Canada&team=Engineering",
         http_method="GET",
         parser_key="lever",
         job_id_key="text",
