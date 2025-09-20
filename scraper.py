@@ -76,7 +76,18 @@ class JobScraper:
                     response = self.session.get(config.api_url, timeout=10)
                 response.raise_for_status()
 
-                parsed = self._parse_response(name, config, response.json())
+                json_data = response.json()
+                
+                if hasattr(config, 'data_path') and config.data_path: 
+                    jobs_list = json_data
+                    for key in config.data_path:
+                        jobs_list = jobs_list[key]
+                
+                else: 
+                    jobs_list = json_data
+
+                parsed = self._parse_response(name, config, jobs_list)
+                
                 all_parsed_jobs.extend(parsed)
             except requests.exceptions.RequestException as e:
                 print(f"  ❌ Error fetching jobs for {name.title()}: {e}")
@@ -90,6 +101,8 @@ class JobScraper:
             return self._parse_greenhouse_jobs(company, config, data)
         elif config.parser_key == "lever":
             return self._parse_lever_jobs(company, config, data)
+        elif config.parser_key == "ashbyhq": 
+            return self._parse_ashbyhq_jobs(company, config, data)
         print(f"  No parser found for key: {config.parser_key}")
         return []
 
@@ -208,6 +221,22 @@ class JobScraper:
                 posted_date=self._parse_date(raw_job.get(config.job_age_key))
             ))
 
+        return result
+    
+    def _parse_ashbyhq_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
+        result = []
+
+        for raw_job in data:
+            job_id = raw_job.get("id")
+            if not job_id:
+                continue
+        
+            result.append(JobPosting(
+                company=company,
+                job_id=raw_job.get("id")
+            ))
+        
+        print("result =>", result)
         return result
 
     def _is_relevant_title(self, title: Optional[str]) -> bool:

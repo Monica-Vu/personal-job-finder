@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from constants import JobPostingAgeKey
 
@@ -7,6 +7,7 @@ class CompanyConfig:
     """Configuration for a single company's job API."""
     api_url: str
     http_method: str = "POST"
+    data_path: Optional[List[str]] = None
     body: Optional[Dict[str, Any]] = None
     parser_key: str = "workday"
     job_id_key: str = "bulletFields"
@@ -419,7 +420,32 @@ COMPANY_CONFIGS = {
         parser_key="lever",
         job_id_key="text",
         job_age_key="createdAt"
-    )
+    ),
+    "commonroom": CompanyConfig(
+        api_url="https://jobs.ashbyhq.com/api/non-user-graphql?op=ApiJobPostings",
+        http_method="POST",
+        data_path=["data", "jobBoardWithTeams", "jobPostings"],
+        body= {
+            "query": """
+                query FullJobBoard($organizationHostedJobsPageName: String!) {
+                jobBoardWithTeams(organizationHostedJobsPageName: $organizationHostedJobsPageName) {
+                    jobPostings {
+                    id
+                    title
+                    locationName
+                    teamId
+                    }
+                }
+                }
+            """,
+            "variables": {
+                "organizationHostedJobsPageName": "commonroom"
+            }
+        },
+        parser_key="ashbyhq",
+        job_id_key="text",
+        job_age_key="createdAt"
+    ),
 }
 
 """
