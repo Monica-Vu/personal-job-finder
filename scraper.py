@@ -171,14 +171,24 @@ class JobScraper:
 
         return jobs
 
-    def _filter_gh_jobs_by_location(self, jobs):
+    def _filter_jobs_by_location_fe(self, jobs, key):
         result = []
 
         included_areas = [kw.upper() for kw in LOCATION_KEY_WORDS]
         excluded_areas = [kw.upper() for kw in EXCLUDE_LOCATION_KEY_WORDS]
 
+        keys = key.split('.')
+
         for raw_job in jobs:
-            location_name = raw_job.get('location', {}).get('name', '').upper()
+            location_value = raw_job 
+
+            try:
+                for key in keys: 
+                    location_value = location_value[key]
+            except (KeyError, TypeError):
+                location_value = ""
+            
+            location_name = str(location_value).upper()
 
             valid_locations = any(kw in location_name for kw in included_areas)
             invalid_locations = any(
@@ -191,7 +201,7 @@ class JobScraper:
     def _parse_greenhouse_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
         result = []
         jobs = data.get("jobs", [])
-        location_relevant_jobs = self._filter_gh_jobs_by_location(jobs)
+        location_relevant_jobs = self._filter_jobs_by_location_fe(jobs, key="locations.name")
 
         for raw_job in location_relevant_jobs:
             job_id = str(raw_job.get(config.job_id_key, ""))
@@ -225,18 +235,20 @@ class JobScraper:
     
     def _parse_ashbyhq_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
         result = []
+        location_relevant_jobs = self._filter_jobs_by_location_fe(data, key="locations")
 
-        for raw_job in data:
+        for raw_job in location_relevant_jobs:
             job_id = raw_job.get("id")
             if not job_id:
                 continue
         
             result.append(JobPosting(
                 company=company,
-                job_id=raw_job.get("id")
+                job_id=raw_job.get("id"),
+                title=raw_job.get("title"),
+                location=raw_job.get("locationName")
             ))
-        
-        print("result =>", result)
+
         return result
 
     def _is_relevant_title(self, title: Optional[str]) -> bool:
