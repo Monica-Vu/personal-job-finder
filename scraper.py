@@ -36,9 +36,9 @@ class JobScraper:
         try:
             with open(APPLIED_JOBS_FILE, 'w') as f:
                 json.dump(data_to_save, f, indent=2)
-            print(f"✅ Successfully saved applied jobs to {APPLIED_JOBS_FILE}")
+            print(f"Successfully saved applied jobs to {APPLIED_JOBS_FILE}")
         except IOError as e:
-            print(f"❌ Error: Could not save applied jobs: {e}")
+            print(f"Error: Could not save applied jobs: {e}")
 
     def run(self, specific_companies: Optional[List[str]] = None):
         """Main method to run the entire scraping and filtering process."""
@@ -90,7 +90,7 @@ class JobScraper:
                 
                 all_parsed_jobs.extend(parsed)
             except requests.exceptions.RequestException as e:
-                print(f"  ❌ Error fetching jobs for {name.title()}: {e}")
+                print(f"Error fetching jobs for {name.title()}: {e}")
         return all_parsed_jobs
 
     def _parse_response(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
@@ -197,6 +197,18 @@ class JobScraper:
             if valid_locations and not invalid_locations:
                 result.append(raw_job)
         return result
+    
+    def _filter_jobs_by_domain(self, jobs, key, target_domain_id): 
+        result = []
+
+        for job in jobs: 
+            team_id = job[key]
+
+            if (team_id == target_domain_id):
+                result.append(job)
+        
+        return result
+
 
     def _parse_greenhouse_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
         result = []
@@ -236,15 +248,16 @@ class JobScraper:
     def _parse_ashbyhq_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
         result = []
         location_relevant_jobs = self._filter_jobs_by_location_fe(data, key="locations")
+        domain_relevant_jobs = self._filter_jobs_by_domain(location_relevant_jobs, key="teamId", target_domain_id=config.team_id)
 
-        for raw_job in location_relevant_jobs:
-            job_id = raw_job.get("id")
+        for raw_job in domain_relevant_jobs:
+            job_id = raw_job.get(config.job_id_key)
             if not job_id:
                 continue
         
             result.append(JobPosting(
                 company=company,
-                job_id=raw_job.get("id"),
+                job_id=raw_job.get(config.job_id_key),
                 title=raw_job.get("title"),
                 location=raw_job.get("locationName")
             ))

@@ -9,6 +9,7 @@ class CompanyConfig:
     http_method: str = "POST"
     data_path: Optional[List[str]] = None
     body: Optional[Dict[str, Any]] = None
+    team_id: Optional[str] = None
     parser_key: str = "workday"
     job_id_key: str = "bulletFields"
     job_age_key: str = "postedOn"
@@ -443,8 +444,9 @@ COMPANY_CONFIGS = {
             }
         },
         parser_key="ashbyhq",
-        job_id_key="text",
-        job_age_key="createdAt"
+        job_id_key="id",
+        job_age_key=None,
+        team_id="20fb07a1-36ca-4c01-9bbf-fa00b804e315"
     ),
 }
 
