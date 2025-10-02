@@ -23,14 +23,14 @@ TERMS_TO_EXCLUDE: Set[str] = {
     "RESEARCHER", "ANDROID", "HEAD", "LEAD", 'MANAGEMENT',
     "PRINCIPAL", "DESIGNER", "ARCHITECT", "DATA SCIENTIST", 
     "SCIENTIST", "STRATEGIST", "PRODUCT OWNER", "COMMUNICATIONS SPECIALIST",
-    "CONSULTANT"
+    "CONSULTANT", "IOS"
 }
 
 # Locations to Include and Exclude 
-LOCATION_KEY_WORDS = ["VANCOUVER", "BURNABY", "CANADA"]
+LOCATION_KEY_WORDS = ["VANCOUVER", "BURNABY", "CANADA", "REMOTE"]
 
 EXCLUDE_LOCATION_KEY_WORDS = ["TORONTO", "MONTREAL",
-                              "OTTAWA", "CALGARY", "ONTARIO", "ALBERTA", "QUEBEC"]
+                              "OTTAWA", "CALGARY", "ONTARIO", "ALBERTA", "QUEBEC", "US"]
 
 # path for job ids to exclude
 APPLIED_JOBS_FILE = "excluded_jobs.json"

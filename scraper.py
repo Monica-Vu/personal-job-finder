@@ -60,7 +60,7 @@ class JobScraper:
             print(f"\n Found {len(fresh_jobs)} new, relevant jobs to review:")
             for job in fresh_jobs:
                 print(
-                    f"  - {job.title} at {job.company.title()} ({job.location})")
+                    f"  - {job.title} at {job.company.title()} ({job.location}) | ID: {job.job_id}")
         else:
             print("\nNo new relevant jobs found.")
 
@@ -247,7 +247,7 @@ class JobScraper:
     
     def _parse_ashbyhq_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
         result = []
-        location_relevant_jobs = self._filter_jobs_by_location_fe(data, key="locations")
+        location_relevant_jobs = self._filter_jobs_by_location_fe(data, key="locationName")
         domain_relevant_jobs = self._filter_jobs_by_domain(location_relevant_jobs, key="teamId", target_domain_id=config.team_id)
 
         for raw_job in domain_relevant_jobs:
@@ -265,7 +265,6 @@ class JobScraper:
         return result
 
     def _is_relevant_title(self, title: Optional[str]) -> bool:
-        """Efficiently checks if a title contains excluded terms using uppercase."""
         if not title:
             return False
 
@@ -275,16 +274,15 @@ class JobScraper:
         return not to_exclude
 
     def _filter_jobs(self, jobs: List[JobPosting]) -> List[JobPosting]:
-        """Filters a list of JobPosting objects through a pipeline of checks."""
         final_jobs = []
         today = datetime.now(timezone.utc)
+        print("_filter_jobs is called")
 
         for job in jobs:
             if job.job_id in self.applied_ids_by_company.get(job.company, set()):
                 continue
             if not self._is_relevant_title(job.title):
                 continue
-            # This logic now KEEPS jobs with no date
             if job.posted_date and (today - job.posted_date).days > MAX_AGE_FOR_JOB_IN_DAYS:
                 continue
 

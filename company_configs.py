@@ -203,8 +203,8 @@ COMPANY_CONFIGS = {
                 "jobFamilyGroup": [
                     "def6fe28d9a210a6e1ddb30d81afbf0e"
                 ],
-                "Location_Country": [
-                    "a30a87ed25634629aa6c3958aa2b91ea"
+                "locations": [
+                    "4aba963a78d401654a86adbe5b01c998"
                 ]
             },
             "limit": 20,
@@ -393,9 +393,16 @@ COMPANY_CONFIGS = {
         job_id_key="id",
         job_age_key="first_published"
     ),
+    "gomotive": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/gomotive/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published"
+    ),
     ### LEVER 
     "jane": CompanyConfig(
-        api_url="https://api.lever.co/v0/postings/janeapp?location=Canada&team=Software%20Development",
+        api_url="https://api.lever.co/v0/postings/janeapp?location=Canada&department=Software%20Development",
         http_method="GET",
         parser_key="lever",
         job_id_key="text",
@@ -422,6 +429,35 @@ COMPANY_CONFIGS = {
         job_id_key="text",
         job_age_key="createdAt"
     ),
+    "arcteryx": CompanyConfig(
+        api_url="https://api.lever.co/v0/postings/suger?location=Vancouver,%20BC&team=Engineering",
+        http_method="GET",
+        parser_key="lever",
+        job_id_key="text",
+        job_age_key="createdAt"
+    ),
+    "suger": CompanyConfig(
+        api_url="https://api.lever.co/v0/postings/suger?location=Vancouver,%20BC&team=Engineering",
+        http_method="GET",
+        parser_key="lever",
+        job_id_key="text",
+        job_age_key="createdAt"
+    ),
+    "sensortower": CompanyConfig(
+        api_url="https://api.lever.co/v0/postings/sensortower?location=Vancouver",
+        http_method="GET",
+        parser_key="lever",
+        job_id_key="text",
+        job_age_key="createdAt"
+    ),
+    "maple": CompanyConfig(
+        api_url="https://api.lever.co/v0/postings/getmaple",
+        http_method="GET",
+        parser_key="lever",
+        job_id_key="text",
+        job_age_key="createdAt"
+    ),
+    ## ASHBYHQ
     "commonroom": CompanyConfig(
         api_url="https://jobs.ashbyhq.com/api/non-user-graphql?op=ApiJobPostings",
         http_method="POST",
@@ -447,6 +483,54 @@ COMPANY_CONFIGS = {
         job_id_key="id",
         job_age_key=None,
         team_id="20fb07a1-36ca-4c01-9bbf-fa00b804e315"
+    ),
+    "quora": CompanyConfig(
+        api_url="https://jobs.ashbyhq.com/api/non-user-graphql?op=ApiJobBoardWithTeams",
+        http_method="POST",
+        data_path=["data","jobBoard", "jobPostings"],
+        body= {
+                "query": """
+                    query ApiJobBoardWithTeams($organizationHostedJobsPageName: String!) {
+                    jobBoard: jobBoardWithTeams(
+                        organizationHostedJobsPageName: $organizationHostedJobsPageName
+                    ) {
+                        teams {
+                        id
+                        name
+                        parentTeamId
+                        __typename
+                        }
+                        jobPostings {
+                        id
+                        title
+                        teamId
+                        locationId
+                        locationName
+                        secondaryLocations {
+                            ...JobPostingSecondaryLocationParts
+                            __typename
+                        }
+                        compensationTierSummary
+                        __typename
+                        }
+                        __typename
+                    }
+                    }
+
+                    fragment JobPostingSecondaryLocationParts on JobPostingSecondaryLocation {
+                    locationId
+                    locationName
+                    __typename
+                    }
+            """,
+            "variables": {
+                "organizationHostedJobsPageName": "quora"
+            }
+        },
+        parser_key="ashbyhq",
+        job_id_key="id",
+        job_age_key=None,
+        team_id="f2fc32f2-ac96-4385-9b66-6ca7feb3e9f1"
     ),
 }
 
