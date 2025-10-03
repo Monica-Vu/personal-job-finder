@@ -276,7 +276,6 @@ class JobScraper:
     def _filter_jobs(self, jobs: List[JobPosting]) -> List[JobPosting]:
         final_jobs = []
         today = datetime.now(timezone.utc)
-        print("_filter_jobs is called")
 
         for job in jobs:
             if job.job_id in self.applied_ids_by_company.get(job.company, set()):

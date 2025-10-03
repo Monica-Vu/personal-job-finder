@@ -230,7 +230,22 @@ COMPANY_CONFIGS = {
         },
         job_age_key="JobPostingAgeKey.POSTED_ON"
     ),
-
+    "brilliancanada": CompanyConfig(
+        api_url="https://brilliancanada.wd3.myworkdayjobs.com/wday/cxs/brilliancanada/Omegro/jobs",
+        body={
+            "appliedFacets": {
+                    "locations": [
+                        "fc8da1b0f51d018732ec146710020601"
+                    ],
+                    "jobFamilyGroup": [
+                        "bd289a9e9c38109a2fdd27bbd15d53af"
+                    ]
+                },
+            "limit": 20,
+            "offset": 0,
+        },
+        job_age_key=JobPostingAgeKey.POSTED_ON
+    ),
     # GREENHOUSE
     "take-two": CompanyConfig(
         api_url="https://boards-api.greenhouse.io/v1/boards/taketwo/jobs",
@@ -399,6 +414,20 @@ COMPANY_CONFIGS = {
         parser_key="greenhouse",
         job_id_key="id",
         job_age_key="first_published"
+    ),
+    "pingidentity": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/pingidentity/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published",
+    ),
+    "sayari": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/sayari/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published",
     ),
     ### LEVER 
     "jane": CompanyConfig(
