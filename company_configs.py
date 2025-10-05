@@ -561,6 +561,38 @@ COMPANY_CONFIGS = {
         job_age_key=None,
         team_id="f2fc32f2-ac96-4385-9b66-6ca7feb3e9f1"
     ),
+    "flaglerhealth": CompanyConfig(
+        api_url="https://jobs.ashbyhq.com/api/non-user-graphql?op=ApiJobBoardWithTeams",
+        http_method="POST",
+        data_path=["data","jobBoard", "jobPostings"],
+        body= {
+                "query": """
+                    query ApiJobBoardWithTeams($organizationHostedJobsPageName: String!) {
+                    jobBoard: jobBoardWithTeams(
+                        organizationHostedJobsPageName: $organizationHostedJobsPageName
+                    ) {
+                        jobPostings {
+                        id
+                        title
+                        teamId
+                        locationId
+                        locationName
+                        workplaceType
+                        employmentType
+                        }
+                        __typename
+                        }
+                    }
+            """,
+            "variables": {
+                "organizationHostedJobsPageName": "flaglerhealth"
+                }
+        },
+        parser_key="ashbyhq",
+        job_id_key="id",
+        job_age_key=None,
+        team_id="14147696-3a4a-4b1b-abcd-d05b054d7e59"
+    ),
 }
 
 """
