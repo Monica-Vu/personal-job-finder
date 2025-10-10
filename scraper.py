@@ -171,13 +171,16 @@ class JobScraper:
 
         return jobs
 
+    # TODO: make keys a list of `key` 
     def _filter_jobs_by_location_fe(self, jobs, key):
+        print("key =>", key)
         result = []
 
         included_areas = [kw.upper() for kw in LOCATION_KEY_WORDS]
         excluded_areas = [kw.upper() for kw in EXCLUDE_LOCATION_KEY_WORDS]
 
         keys = key.split('.')
+        print("keys =>", keys)
 
         for raw_job in jobs:
             location_value = raw_job 

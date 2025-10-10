@@ -593,10 +593,71 @@ COMPANY_CONFIGS = {
         job_age_key=None,
         team_id="14147696-3a4a-4b1b-abcd-d05b054d7e59"
     ),
+    "auditboard": CompanyConfig(
+        api_url="https://jobs.ashbyhq.com/api/non-user-graphql?op=ApiJobBoardWithTeams",
+        http_method="POST",
+        data_path=["data","jobBoard", "jobPostings"],
+        body= {
+                "query": """
+                    query ApiJobBoardWithTeams($organizationHostedJobsPageName: String!) {
+                    jobBoard: jobBoardWithTeams(
+                        organizationHostedJobsPageName: $organizationHostedJobsPageName
+                    ) {
+                        jobPostings {
+                        id
+                        title
+                        teamId
+                        locationId
+                        locationName
+                        }
+                    }
+                    }
+            """,
+            "variables": {
+              	"organizationHostedJobsPageName": "auditboard"
+            }
+        },
+        parser_key="ashbyhq",
+        job_id_key="id",
+        job_age_key=None,
+        team_id="8875229b-aa84-46a4-85a7-018a8719bd68"
+    ),
+    "stedi": CompanyConfig(
+            api_url="https://jobs.ashbyhq.com/api/non-user-graphql?op=ApiJobBoardWithTeams",
+            http_method="POST",
+            data_path=["data","jobBoard", "jobPostings"],
+            body= {
+                    "query": """
+                        query ApiJobBoardWithTeams($organizationHostedJobsPageName: String!) {
+                        jobBoard: jobBoardWithTeams(
+                            organizationHostedJobsPageName: $organizationHostedJobsPageName
+                        ) {
+                            jobPostings {
+                            id
+                            title
+                            teamId
+                            locationId
+                            locationName
+                            workplaceType  
+                            }
+                        }
+                    }
+                """,
+                "variables": {
+                    "organizationHostedJobsPageName": "stedi"
+                }
+            },
+            parser_key="ashbyhq",
+            job_id_key="id",
+            job_age_key=None,
+            team_id="e46929dd-8491-47cf-ba7b-962ed1f05e3f"
+            )
 }
 
 """
  TODO: 
  - go through entire script
+
+
 
  """
