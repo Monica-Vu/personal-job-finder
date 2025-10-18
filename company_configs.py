@@ -651,7 +651,14 @@ COMPANY_CONFIGS = {
             job_id_key="id",
             job_age_key=None,
             team_id="e46929dd-8491-47cf-ba7b-962ed1f05e3f"
-            )
+            ),
+    "github": CompanyConfig(
+        api_url="https://www.github.careers/api/jobs?keywords=software&page=1&locations=,British%20Columbia,Canada&sortBy=relevance&descending=false&internal=false&deviceId=undefined&domain=githubinc.jibeapply.com",
+        http_method="GET",
+        parser_key="github",
+        job_id_key="req_id",
+        job_age_key="posted_date"
+    )
 }
 
 """

@@ -103,6 +103,8 @@ class JobScraper:
             return self._parse_lever_jobs(company, config, data)
         elif config.parser_key == "ashbyhq": 
             return self._parse_ashbyhq_jobs(company, config, data)
+        elif config.parser_key == "github":
+            return self._parse_github_jobs(company, config, data)
         print(f"  No parser found for key: {config.parser_key}")
         return []
 
@@ -173,14 +175,12 @@ class JobScraper:
 
     # TODO: make keys a list of `key` 
     def _filter_jobs_by_location_fe(self, jobs, key):
-        print("key =>", key)
         result = []
 
         included_areas = [kw.upper() for kw in LOCATION_KEY_WORDS]
         excluded_areas = [kw.upper() for kw in EXCLUDE_LOCATION_KEY_WORDS]
 
         keys = key.split('.')
-        print("keys =>", keys)
 
         for raw_job in jobs:
             location_value = raw_job 
@@ -212,7 +212,6 @@ class JobScraper:
         
         return result
 
-
     def _parse_greenhouse_jobs(self, company: str, config: CompanyConfig, data: dict) -> List[JobPosting]:
         result = []
         jobs = data.get("jobs", [])
@@ -220,6 +219,7 @@ class JobScraper:
 
         for raw_job in location_relevant_jobs:
             job_id = str(raw_job.get(config.job_id_key, ""))
+            print("job_id =>", job_id)
             if not job_id:
                 continue
 
@@ -265,6 +265,28 @@ class JobScraper:
                 location=raw_job.get("locationName")
             ))
 
+        return result
+    
+    def _parse_github_jobs(self, company: str, config: CompanyConfig, data) -> List[JobPosting]:
+        result = []
+
+        for job in data.get("jobs", []): 
+            data = job.get('data', {})
+
+            job_id = data.get('req_id')
+            title = data.get('title')
+            location = data.get('location_name')
+            date_posted = data.get('posted_date')
+
+            # TODO: create url link for each job
+            result.append(JobPosting(
+                company=company,
+                job_id=job_id,
+                title=title, 
+                location=location,
+                posted_date=self._parse_date(date_posted)
+            ))
+        
         return result
 
     def _is_relevant_title(self, title: Optional[str]) -> bool:
