@@ -13,7 +13,7 @@ class CompanyConfig:
     parser_key: str = "workday"
     job_id_key: str = "bulletFields"
     job_age_key: str = "postedOn"
-
+    career_page_url: Optional[str] = "No url available"
 
 # Company configurations - add new companies here
 COMPANY_CONFIGS = {
@@ -55,7 +55,8 @@ COMPANY_CONFIGS = {
             "offset": 0,
             "searchText": ""
         },
-        job_age_key=JobPostingAgeKey.POSTED_ON
+        job_age_key=JobPostingAgeKey.POSTED_ON,
+        career_page_url="https://clio.wd3.myworkdayjobs.com/en-US/ClioCareerSite?locations=1b6969fbfbca0101f164999ecea20000&locations=951c033a9bfe1000baf025938f160000&locations=29827a73287b01033875f6106f2c0000&jobFamilyGroup=29827a73287b0103383979088de50000&workerSubType=29827a73287b0103383999ceb88b0000"
     ),
     "remitly": CompanyConfig(
         api_url="https://remitly.wd5.myworkdayjobs.com/wday/cxs/remitly/Remitly_Careers/jobs",
@@ -72,7 +73,8 @@ COMPANY_CONFIGS = {
             "offset": 0,
             "searchText": "Software+Developer"
         },
-        job_age_key=JobPostingAgeKey.POSTED_ON
+        job_age_key=JobPostingAgeKey.POSTED_ON,
+        career_page_url="https://remitly.wd5.myworkdayjobs.com/en-US/Remitly_Careers?redirect=/Remitly_Careers/job/New-Westminster-British-Columbia-Canada/Identity---Trust-Investigation-Specialist-II_R_104597/apply?source=Remitly%2520Careers%2520Site&locationCountry=a30a87ed25634629aa6c3958aa2b91ea&locations=2458716c04a71002062e0e03eb960000&jobFamilyGroup=c9699b32e2da1029a051260e906d0000"
     ),
     "openlane": CompanyConfig(
         api_url="https://kar.wd1.myworkdayjobs.com/wday/cxs/kar/OPENLANE_Careers/jobs",
@@ -127,7 +129,8 @@ COMPANY_CONFIGS = {
             "limit": 20,
             "offset": 0,
             "searchText": ""
-        }
+        },
+        job_id_key="bulletFields"
     ),
     "workday": CompanyConfig(
         api_url="https://workday.wd5.myworkdayjobs.com/wday/cxs/workday/Workday/jobs",
@@ -146,7 +149,8 @@ COMPANY_CONFIGS = {
             "offset": 0,
             "searchText": ""
         },
-        job_age_key=JobPostingAgeKey.POSTED_ON
+        job_age_key=JobPostingAgeKey.POSTED_ON,
+        career_page_url="https://workday.wd5.myworkdayjobs.com/Workday?source=Careers_Website_eng&jobFamilyGroup=a88cba90a00841e0b750341c541b9d56&jobFamilyGroup=11d42f4a487c46b9b29ab3e087c2f5ca&jobFamilyGroup=8c5ce7a1cffb43e0a819c249a49fcb00&locations=2dbd309d3ef64fffb7131f8b596a774a"
     ),
     "autodesk": CompanyConfig(
         api_url="https://autodesk.wd1.myworkdayjobs.com/wday/cxs/autodesk/Ext/jobs",
@@ -168,7 +172,7 @@ COMPANY_CONFIGS = {
         },
         job_age_key=JobPostingAgeKey.POSTED_ON
     ),
-    "bcca": CompanyConfig(
+    "bcaa": CompanyConfig(
         api_url="https://bcaa.wd3.myworkdayjobs.com/wday/cxs/bcaa/bcaacareers/jobs",
         body={
             "appliedFacets": {
@@ -180,7 +184,8 @@ COMPANY_CONFIGS = {
             "offset": 0,
             "searchText": ""
         },
-        job_age_key=JobPostingAgeKey.POSTED_ON
+        job_age_key=JobPostingAgeKey.POSTED_ON,
+        career_page_url="https://bcaa.wd3.myworkdayjobs.com/bcaacareers?locations=25ae589691dd0132f6d55795a6499214&locations=6b86c3d1fbd8019abef7f55ef34de34b&locations=6b86c3d1fbd801e88583ac08f04dd44a&locations=6b86c3d1fbd80114c130afbaef4dcb4a"
     ),
     "flexera": CompanyConfig(
         api_url="https://flexerasoftware.wd1.myworkdayjobs.com/wday/cxs/flexerasoftware/FlexeraSoftware/jobs",
@@ -194,7 +199,8 @@ COMPANY_CONFIGS = {
             "offset": 0,
             "searchText": ""
         },
-        job_age_key=JobPostingAgeKey.POSTED_ON
+        job_age_key=JobPostingAgeKey.POSTED_ON,
+        career_page_url="https://flexerasoftware.wd1.myworkdayjobs.com/FlexeraSoftware?locationCountry=a30a87ed25634629aa6c3958aa2b91ea"
     ),
     "ticketmaster": CompanyConfig(
         api_url="https://livenation.wd1.myworkdayjobs.com/wday/cxs/livenation/TMExternalSite/jobs",
@@ -486,6 +492,13 @@ COMPANY_CONFIGS = {
         job_id_key="text",
         job_age_key="createdAt"
     ),
+    "d2l": CompanyConfig(
+        api_url="https://boards-api.greenhouse.io/v1/boards/d2l/jobs",
+        http_method="GET",
+        parser_key="greenhouse",
+        job_id_key="id",
+        job_age_key="first_published",
+    ),
     ## ASHBYHQ
     "commonroom": CompanyConfig(
         api_url="https://jobs.ashbyhq.com/api/non-user-graphql?op=ApiJobPostings",
@@ -658,7 +671,14 @@ COMPANY_CONFIGS = {
         parser_key="github",
         job_id_key="req_id",
         job_age_key="posted_date"
-    )
+    ),
+    # "atlassian": CompanyConfig(
+    #     api_url="https://www.atlassian.com/endpoint/careers/listings",
+    #     http_method="GET",
+    #     parser_key="atlassian", 
+    #     job_id_key="id",
+    #     job_age_key="updatedDate"
+    # )
 }
 
 """

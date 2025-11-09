@@ -105,6 +105,8 @@ class JobScraper:
             return self._parse_ashbyhq_jobs(company, config, data)
         elif config.parser_key == "github":
             return self._parse_github_jobs(company, config, data)
+        elif config.parser_key == "atlassian":
+            return self._parse_atlassian_jobs(company, config, data)
         print(f"  No parser found for key: {config.parser_key}")
         return []
 
@@ -162,18 +164,24 @@ class JobScraper:
             if not job_id_list:
                 continue
 
+            job_id = job_id=job_id_list[0]
+            location = raw_job.get("locationsText")
+
+            if company == "accolade":
+                job_id = job_id_list[1]
+                location = job_id_list[0]
+
             jobs.append(JobPosting(
                 company=company,
-                job_id=job_id_list[0],
+                job_id=job_id,
                 title=raw_job.get("title"),
-                url=f"https://{config.api_url.split('/')[2]}{raw_job.get('externalPath', '')}",
-                location=raw_job.get("locationsText"),
+                url=config.career_page_url,
+                location=location,
                 posted_date=self._parse_date(raw_job.get(config.job_age_key))
             ))
 
         return jobs
 
-    # TODO: make keys a list of `key` 
     def _filter_jobs_by_location_fe(self, jobs, key):
         result = []
 
@@ -191,14 +199,20 @@ class JobScraper:
             except (KeyError, TypeError):
                 location_value = ""
             
+            # TODO: modify logic below to handle a list of locations
+            # we can check if it's a list. For each location in locations list
+            # we convert it to a name as below 
             location_name = str(location_value).upper()
 
+            # TODO: see if logic works for a lists of locations? 
             valid_locations = any(kw in location_name for kw in included_areas)
-            invalid_locations = any(
-                kw in location_name for kw in excluded_areas)
+            invalid_locations = any(kw in location_name for kw in excluded_areas)
 
             if valid_locations and not invalid_locations:
                 result.append(raw_job)
+                # TODO: break the loop once it ends? 
+                # TODO: create unit tests for these?
+                
         return result
     
     def _filter_jobs_by_domain(self, jobs, key, target_domain_id): 
@@ -273,10 +287,10 @@ class JobScraper:
         for job in data.get("jobs", []): 
             data = job.get('data', {})
 
-            job_id = data.get('req_id')
+            job_id = data.get(config.job_id_key)
             title = data.get('title')
             location = data.get('location_name')
-            date_posted = data.get('posted_date')
+            date_posted = data.get(config.job_age_key)
 
             # TODO: create url link for each job
             result.append(JobPosting(
@@ -285,9 +299,15 @@ class JobScraper:
                 title=title, 
                 location=location,
                 posted_date=self._parse_date(date_posted)
-            ))
+        ))
         
         return result
+    
+    def _parse_atlassian_jobs(self, company: str, config: CompanyConfig, data):
+        result = [] 
+
+        for job in data: 
+            print(job["locations"])
 
     def _is_relevant_title(self, title: Optional[str]) -> bool:
         if not title:

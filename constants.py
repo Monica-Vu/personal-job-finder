@@ -12,11 +12,11 @@ class JobPostingAgeKey(StrEnum):
     UPDATED_AT = "updated_at"
 
 # --- Filtering Configuration ---
-MAX_AGE_FOR_JOB_IN_DAYS: int = 30
+MAX_AGE_FOR_JOB_IN_DAYS: int = 3
 
 # Terms to exclude from job searches 
 TERMS_TO_EXCLUDE: Set[str] = {
-    "STAFF", "SENIOR", "SR.", "SR", "MANAGER", "MOBILE",
+    "STAFF", "MANAGER", "MOBILE",
     "MACHINE LEARNING", "MLOPS", "DEVOPS", "SALESFORCE",
     "DIRECTOR", "HELP DESK", "VP", "EXECUTIVE", "CO-OP",
     "COOP", "INTERN", "SALES", 'ASSISTANT', "SUPERVISOR",
