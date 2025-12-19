@@ -35,7 +35,8 @@ COMPANY_CONFIGS = {
             "offset": 0,
             "searchText": "Software+Developer"
         },
-        job_age_key=JobPostingAgeKey.POSTED_ON
+        job_age_key=JobPostingAgeKey.POSTED_ON,
+        career_page_url=""
     ),
     "crowdstrike": CompanyConfig(
         api_url="https://crowdstrike.wd5.myworkdayjobs.com/wday/cxs/crowdstrike/crowdstrikecareers/jobs",
@@ -464,13 +465,13 @@ COMPANY_CONFIGS = {
         job_id_key="text",
         job_age_key="createdAt"
     ),
-    "arcteryx": CompanyConfig(
-        api_url="https://api.lever.co/v0/postings/suger?location=Vancouver,%20BC&team=Engineering",
-        http_method="GET",
-        parser_key="lever",
-        job_id_key="text",
-        job_age_key="createdAt"
-    ),
+    # "arcteryx": CompanyConfig(
+    #     api_url="https://api.lever.co/v0/postings/suger?location=Vancouver,%20BC&team=Engineering",
+    #     http_method="GET",
+    #     parser_key="lever",
+    #     job_id_key="text",
+    #     job_age_key="createdAt"
+    # ),
     "suger": CompanyConfig(
         api_url="https://api.lever.co/v0/postings/suger?location=Vancouver,%20BC&team=Engineering",
         http_method="GET",
