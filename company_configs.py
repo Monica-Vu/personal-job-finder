@@ -437,13 +437,6 @@ COMPANY_CONFIGS = {
         job_age_key="first_published",
     ),
     ### LEVER 
-    "jane": CompanyConfig(
-        api_url="https://api.lever.co/v0/postings/janeapp?location=Canada&department=Software%20Development",
-        http_method="GET",
-        parser_key="lever",
-        job_id_key="text",
-        job_age_key="createdAt"
-    ),
     "xero": CompanyConfig(
         api_url="https://api.lever.co/v0/postings/xero?location=Vancouver,%20CA&team=Engineering",
         http_method="GET",
@@ -673,6 +666,36 @@ COMPANY_CONFIGS = {
         job_id_key="req_id",
         job_age_key="posted_date"
     ),
+    "jane":  CompanyConfig(
+            api_url="https://jobs.ashbyhq.com/api/non-user-graphql",
+            http_method="POST",
+            data_path=["data","jobBoard", "jobPostings"],
+            body= {
+                    "query": """
+                        query ApiJobBoardWithTeams($organizationHostedJobsPageName: String!) {
+                        jobBoard: jobBoardWithTeams(
+                            organizationHostedJobsPageName: $organizationHostedJobsPageName
+                        ) {
+                            jobPostings {
+                            id
+                            title
+                            teamId
+                            locationId
+                            locationName
+                            workplaceType  
+                            }
+                        }
+                    }
+                """,
+                "variables": {
+                    "organizationHostedJobsPageName": "jane"
+                }
+            },
+            parser_key="ashbyhq",
+            job_id_key="id",
+            job_age_key=None,
+            team_id="ac78cc47-6459-472f-8c68-a6e5de347650"
+            ),
     # "atlassian": CompanyConfig(
     #     api_url="https://www.atlassian.com/endpoint/careers/listings",
     #     http_method="GET",
